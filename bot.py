@@ -2,12 +2,12 @@ import os, json, requests, time
 
 RPC_HTTP = os.getenv("RPC_HTTP", "https://api.mainnet-beta.solana.com")
 WALLET_LIST = os.getenv("WALLET_LIST", "").strip()  # newline or comma separated
-STATE_FILE = "state.json"                           # stores last sig per wallet
+STATE_FILE = "state.json"
 
-# Alerts: enable one or both
-DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK")      # Discord channel webhook URL (optional)
-TG_TOKEN = os.getenv("TG_TOKEN")                    # Telegram bot token (optional)
-TG_CHAT  = os.getenv("TG_CHAT")                     # Telegram chat id (optional)
+# Alerts (use one or both)
+DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK")
+TG_TOKEN = os.getenv("TG_TOKEN")
+TG_CHAT  = os.getenv("TG_CHAT")
 
 # SPL Token programs
 TOKEN_PROGRAMS = {
@@ -52,21 +52,56 @@ def alert(text):
     send_discord(text)
     send_telegram(text)
 
-def looks_like_mint_init(tx):
-    # Most reliable quick signal is in logs
+def logs_contain_initialize_mint(tx):
     logs = (tx.get("meta") or {}).get("logMessages") or []
-    if any(("InitializeMint" in (l or "")) for l in logs):  # covers InitializeMint & InitializeMint2
-        return True
-    # Gentle fallback: if any top-level instruction targets token programs
+    return any(("InitializeMint" in (l or "")) for l in logs)
+
+def extract_mint_candidates(tx):
+    """
+    Grab likely mint addresses from token-program instructions.
+    For InitializeMint/InitializeMint2 the first account is the Mint.
+    We scan both top-level and inner instructions.
+    """
+    mints = set()
+
     msg = (tx.get("transaction") or {}).get("message") or {}
     keys = msg.get("accountKeys") or []
+    # accountKeys can be strings or objects with {"pubkey": "..."}
     if keys and isinstance(keys[0], dict):
         keys = [k.get("pubkey") for k in keys]
+
+    # helper to resolve an account index or string to pubkey
+    def resolve(acct):
+        if isinstance(acct, int):
+            return keys[acct] if 0 <= acct < len(keys) else None
+        return acct  # already a pubkey string
+
+    # Top-level instructions
     for ix in (msg.get("instructions") or []):
         idx = ix.get("programIdIndex")
-        if idx is not None and idx < len(keys) and keys[idx] in TOKEN_PROGRAMS:
-            return True
-    return False
+        prog = keys[idx] if isinstance(idx, int) and idx < len(keys) else None
+        if prog in TOKEN_PROGRAMS:
+            accs = ix.get("accounts") or []
+            if accs:
+                mint = resolve(accs[0])
+                if mint: mints.add(mint)
+
+    # Inner instructions
+    meta = tx.get("meta") or {}
+    for inner in (meta.get("innerInstructions") or []):
+        for ix in (inner.get("instructions") or []):
+            # inner can have programIdIndex or programId as string
+            prog = ix.get("programId")
+            if prog is None and "programIdIndex" in ix:
+                pidx = ix["programIdIndex"]
+                prog = keys[pidx] if isinstance(pidx, int) and pidx < len(keys) else None
+            if prog in TOKEN_PROGRAMS:
+                accs = ix.get("accounts") or []
+                if accs:
+                    mint = resolve(accs[0])
+                    if mint: mints.add(mint)
+
+    return list(mints)
 
 def process_wallet(wallet, st):
     wallet = wallet.strip()
@@ -84,14 +119,25 @@ def process_wallet(wallet, st):
         print(f"[{wallet}] signatures error:", e)
         return st
 
-    # Older -> newer so last_sig ends up as newest processed
+    # Process oldest -> newest so we end on the newest signature
     for s in reversed(sigs):
         sig = s["signature"]
         try:
             tx = rpc("getTransaction", [sig, {"encoding":"json","maxSupportedTransactionVersion":0}])
-            if tx and looks_like_mint_init(tx):
-                link = f"https://solscan.io/tx/{sig}"
-                alert(f"🚨 New token mint activity\nWallet: `{wallet}`\nTx: {link}")
+
+            if tx and logs_contain_initialize_mint(tx):
+                mints = extract_mint_candidates(tx)
+                if mints:
+                    for mint in mints:
+                        # handy links
+                        solscan = f"https://solscan.io/token/{mint}"
+                        txlink  = f"https://solscan.io/tx/{sig}"
+                        alert(f"🚨 New token mint activity\nWallet: `{wallet}`\nMint: `{mint}`\nToken: {solscan}\nTx: {txlink}")
+                else:
+                    # Fallback alert if we couldn't confidently extract the mint
+                    txlink = f"https://solscan.io/tx/{sig}"
+                    alert(f"🚨 New token mint activity (mint unknown)\nWallet: `{wallet}`\nTx: {txlink}")
+
         except Exception as e:
             print(f"[{wallet}] tx error for {sig}:", e)
 
@@ -102,7 +148,6 @@ def process_wallet(wallet, st):
 
 def parse_wallets(raw):
     if not raw: return []
-    # Accept newline or comma separated
     if "\n" in raw:
         wallets = [w.strip() for w in raw.splitlines()]
     else:
@@ -117,7 +162,7 @@ def main():
     st = load_state()
     for w in wallets:
         st = process_wallet(w, st)
-        time.sleep(0.2)  # gentle on public RPC
+        time.sleep(0.2)
     save_state(st)
 
 if __name__ == "__main__":

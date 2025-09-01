@@ -1,14 +1,18 @@
 import os, json, requests, time, base64
 
 # --------- Config via environment ----------
-RPC_HTTP = os.getenv("RPC_HTTP", "https://api.mainnet-beta.solana.com")
-WALLET_LIST = os.getenv("WALLET_LIST", "").strip()   # newline or comma separated
-STATE_FILE = "state.json"
+RPC_HTTP   = os.getenv("RPC_HTTP", "https://api.mainnet-beta.solana.com")
+WALLET_LIST= os.getenv("WALLET_LIST", "").strip()   # newline or comma separated
+STATE_FILE = os.getenv("STATE_FILE", "state.json")  # per-shard file set by workflow
+
+# Sharding (set by workflow matrix)
+SHARD_INDEX = int(os.getenv("SHARD_INDEX", "-1"))
+SHARD_TOTAL = int(os.getenv("SHARD_TOTAL", "-1"))
 
 # Tuning knobs (safe defaults)
-CONNECT_CHECKS_PER_RUN = int(os.getenv("CONNECT_CHECKS_PER_RUN", "4"))
-HISTORY_PAGES_PER_CONNECTED = int(os.getenv("HISTORY_PAGES_PER_CONNECTED", "2"))
-HISTORY_PAGE_LIMIT = int(os.getenv("HISTORY_PAGE_LIMIT", "100"))
+CONNECT_CHECKS_PER_RUN       = int(os.getenv("CONNECT_CHECKS_PER_RUN", "4"))
+HISTORY_PAGES_PER_CONNECTED  = int(os.getenv("HISTORY_PAGES_PER_CONNECTED", "2"))
+HISTORY_PAGE_LIMIT           = int(os.getenv("HISTORY_PAGE_LIMIT", "100"))
 VERBOSE = os.getenv("VERBOSE", "0") == "1"
 
 # Alerts (use one or both)
@@ -535,10 +539,18 @@ def parse_wallets(raw):
         wallets = [w.strip() for w in raw.split(",")]
     return [w for w in wallets if w]
 
+def apply_shard(wallets, idx, total):
+    if idx < 0 or total <= 0:  # sharding disabled
+        return wallets
+    return [w for i, w in enumerate(wallets) if i % total == idx]
+
 def main():
     wallets = parse_wallets(WALLET_LIST)
     if not wallets:
         raise SystemExit("WALLET_LIST is empty. Provide one wallet per line or comma separated.")
+
+    wallets = apply_shard(wallets, SHARD_INDEX, SHARD_TOTAL)
+    vlog(f"Shard {SHARD_INDEX}/{SHARD_TOTAL} processing {len(wallets)} wallet(s)")
 
     st = load_state()
     for w in wallets:

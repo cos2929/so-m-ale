@@ -1144,3 +1144,10 @@
 2025-09-01 22:06:47,940 - INFO - Shard 3/4 processing 0 wallet(s)
 2025-09-01 22:06:47,941 - INFO - Shard 3/4 processing 0 wallet(s)
 2025-09-01 22:06:47,941 - INFO - Saved state to state_3.json
+2025-09-01 22:06:50,230 - INFO - Shard 1/4 processing 1 wallet(s)
+2025-09-01 22:06:50,231 - INFO - Shard 1/4 processing 1 wallet(s)
+2025-09-01 22:06:50,231 - INFO - Processing wallet: 2AU5FmXiGcoscSd7SMSRAom9dwg38tUuUkHqTWaakqd8
+2025-09-01 22:06:50,231 - INFO - Processing wallet: 2AU5FmXiGcoscSd7SMSRAom9dwg38tUuUkHqTWaakqd8
+2025-09-01 22:06:50,601 - INFO - [2AU5FmXiGcoscSd7SMSRAom9dwg38tUuUkHqTWaakqd8] last_sig: 4ELdQvVGkYQywvBQbnw3DbSmPez1KF2hrdSRMHu8sjzsB7eLWWdqkC7AGUZvfaTM8dNyQmWETZb9gH8HD2qhjBi9 | fetched: 34
+2025-09-01 22:06:50,601 - INFO - [2AU5FmXiGcoscSd7SMSRAom9dwg38tUuUkHqTWaakqd8] new_sigs: 0
+2025-09-01 22:06:50,802 - INFO - Saved state to state_1.json

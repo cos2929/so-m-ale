@@ -1,4 +1,4 @@
-name: so-m-ale
+name: solana-multiwallet-alerts
 
 on:
   schedule:
@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true   # keep GITHUB_TOKEN for push
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -28,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: pip install "requests>=2.31,<2.33"
 
-      # (Optional) quick config summary without exposing secrets
+      # Optional: quick config summary (won't print secrets)
       - name: Config summary (safe)
         run: |
           echo "Has WALLET_LIST: $([[ -n \"${{ vars.WALLET_LIST }}\" ]] && echo yes || echo no)"
@@ -61,6 +63,15 @@ jobs:
           VERBOSE: "1"
         run: python bot.py
 
+      - name: Prepare Git for pushing state.json
+        if: always()
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          BRANCH="${GITHUB_REF_NAME:-$GITHUB_HEAD_REF}"
+          # Rebase to avoid "failed to push some refs" if repo got new commits
+          git fetch origin "$BRANCH" || true
+          git pull --rebase origin "$BRANCH" || true
+
       - name: Save state back to repo
         if: always()
         run: |
@@ -69,5 +80,5 @@ jobs:
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add state.json
             git commit -m "chore: update state [skip ci]" || echo "No changes to commit"
-            git push
+            git push || echo "Push failed (branch protection or race); skipping"
           fi

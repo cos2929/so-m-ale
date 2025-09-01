@@ -1,4 +1,4 @@
-name: solana-multiwallet-alerts (10s loop)
+name: so-m-ale alerts (10s loop, sharded)
 
 on:
   schedule:
@@ -6,17 +6,19 @@ on:
   workflow_dispatch: {}      # manual "Run workflow" button
 
 permissions:
-  contents: write            # to push state.json
-
-# Do NOT cancel the in-progress hourly run; queue the next one
-concurrency:
-  group: solana-alerts
-  cancel-in-progress: false
+  contents: write
 
 jobs:
   alerts:
     runs-on: ubuntu-latest
-    timeout-minutes: 355     # safety (max 6h for Actions; we run ~55m)
+    timeout-minutes: 355
+    strategy:
+      fail-fast: false
+      matrix:
+        shard_index: [0, 1, 2, 3]   # <-- number of parallel shards
+    concurrency:
+      group: so-m-ale-shard-${{ matrix.shard_index }}
+      cancel-in-progress: false
 
     steps:
       - name: Checkout repo
@@ -32,14 +34,15 @@ jobs:
       - name: Install dependencies
         run: pip install "requests>=2.31,<2.33"
 
-      # SAFE summary for multi-line vars (doesn't expose secrets)
       - name: Config summary (safe)
         env:
-          WALLET_LIST:    ${{ vars.WALLET_LIST }}
-          AMM_PROGRAMS:   ${{ vars.AMM_PROGRAMS }}
-          SWAP_PROGRAMS:  ${{ vars.SWAP_PROGRAMS }}
+          WALLET_LIST:     ${{ vars.WALLET_LIST }}
+          AMM_PROGRAMS:    ${{ vars.AMM_PROGRAMS }}
+          SWAP_PROGRAMS:   ${{ vars.SWAP_PROGRAMS }}
           LAUNCH_PROGRAMS: ${{ vars.LAUNCH_PROGRAMS }}
         run: |
+          echo "Shard index: ${{ matrix.shard_index }}"
+          echo "Shard total: 4"
           if [ -n "$WALLET_LIST" ]; then
             echo "Has WALLET_LIST: yes"
             echo "WALLET_LIST entries: $(printf '%s\n' "$WALLET_LIST" | sed '/^\s*$/d;/^\s*#/d' | wc -l)"
@@ -50,70 +53,76 @@ jobs:
           echo "SWAP_PROGRAMS lines: $(printf '%s\n' "$SWAP_PROGRAMS" | sed '/^\s*$/d;/^\s*#/d' | wc -l)"
           echo "LAUNCH_PROGRAMS lines: $(printf '%s\n' "$LAUNCH_PROGRAMS" | sed '/^\s*$/d;/^\s*#/d' | wc -l)"
 
-      - name: Prepare Git for pushing state.json
+      - name: Prepare Git (rebasing avoids push races)
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           BRANCH="${GITHUB_REF_NAME:-$GITHUB_HEAD_REF}"
           git fetch origin "$BRANCH" || true
           git pull --rebase origin "$BRANCH" || true
 
-      - name: Run bot loop (every 10 seconds for ~55 minutes)
+      - name: Run bot loop (every 10s, ~55 minutes)
         env:
-          # RPC endpoint
+          # RPC
           RPC_HTTP: https://api.mainnet-beta.solana.com
 
-          # Inputs (set these in Settings → Secrets and variables → Actions)
+          # Inputs (set in Settings → Secrets and variables → Actions)
           WALLET_LIST:  ${{ vars.WALLET_LIST }}     # one wallet per line
           AMM_PROGRAMS: ${{ vars.AMM_PROGRAMS }}    # one program id per line
           SWAP_PROGRAMS: ${{ vars.SWAP_PROGRAMS }}  # one program id per line
           LAUNCH_PROGRAMS: ${{ vars.LAUNCH_PROGRAMS }}
 
-          # Alerts (Discord required; Telegram optional)
+          # Alerts
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT:  ${{ secrets.TG_CHAT }}
 
-          # Bot tuning knobs
+          # Bot tuning
           CONNECT_CHECKS_PER_RUN: "4"
           HISTORY_PAGES_PER_CONNECTED: "2"
           HISTORY_PAGE_LIMIT: "100"
           VERBOSE: "1"
 
+          # Shard info
+          SHARD_INDEX: ${{ matrix.shard_index }}
+          SHARD_TOTAL: "4"
+          STATE_FILE: state_${{ matrix.shard_index }}.json
+
           # Loop controls
-          INTERVAL_SECONDS: "10"   # <-- your 10s interval
-          MAX_LOOPS: "330"         # 330 * 10s ≈ 55 minutes
+          INTERVAL_SECONDS: "10"
+          MAX_LOOPS: "330"
         shell: bash
         run: |
-          echo "Starting loop: every ${INTERVAL_SECONDS}s, ${MAX_LOOPS} iterations (~55m)"
+          echo "Shard $SHARD_INDEX/$SHARD_TOTAL — loop every ${INTERVAL_SECONDS}s for ${MAX_LOOPS} iterations"
           for i in $(seq 1 "$MAX_LOOPS"); do
-            echo "::group::iteration $i"
-            python bot.py || echo "bot.py exited with $?"
+            echo "::group::shard $SHARD_INDEX iteration $i"
+            python bot.py || echo "bot.py exit code $?"
             echo "::endgroup::"
 
-            # checkpoint state every 60 iterations (~10 minutes)
+            # checkpoint this shard's state every ~10 minutes
             if [ $((i % 60)) -eq 0 ]; then
-              if [ -f state.json ]; then
+              if [ -f "$STATE_FILE" ]; then
                 git config user.name  "github-actions[bot]"
                 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-                git add state.json
-                git commit -m "chore: checkpoint state (iter $i) [skip ci]" || true
+                git add "$STATE_FILE"
+                git commit -m "chore: checkpoint $STATE_FILE (iter $i) [skip ci]" || true
                 git push || true
               fi
             fi
 
-            # avoid sleeping after the last iteration
             if [ "$i" -lt "$MAX_LOOPS" ]; then
               sleep "$INTERVAL_SECONDS"
             fi
           done
 
-      - name: Final save state
+      - name: Final save (this shard)
         if: always()
+        env:
+          STATE_FILE: state_${{ matrix.shard_index }}.json
         run: |
-          if [ -f state.json ]; then
+          if [ -f "$STATE_FILE" ]; then
             git config user.name  "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add state.json
-            git commit -m "chore: update state [skip ci]" || echo "No changes to commit"
-            git push || echo "Push failed (branch protection or race); skipping"
+            git add "$STATE_FILE"
+            git commit -m "chore: update $STATE_FILE [skip ci]" || echo "No changes"
+            git push || echo "Push failed; skipping"
           fi

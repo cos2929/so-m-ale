@@ -1,4 +1,4 @@
-name: sol-m-ale
+name: so-m-ale
 
 on:
   schedule:
@@ -7,6 +7,10 @@ on:
 
 permissions:
   contents: write            # needed to push state.json back to the repo
+
+concurrency:
+  group: solana-alerts
+  cancel-in-progress: true
 
 jobs:
   alerts:
@@ -22,14 +26,22 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install "requests>=2.31,<2.33"
+
+      # (Optional) quick config summary without exposing secrets
+      - name: Config summary (safe)
+        run: |
+          echo "Has WALLET_LIST: $([[ -n \"${{ vars.WALLET_LIST }}\" ]] && echo yes || echo no)"
+          echo "AMM_PROGRAMS lines: $(echo \"${{ vars.AMM_PROGRAMS }}\" | wc -l)"
+          echo "SWAP_PROGRAMS lines: $(echo \"${{ vars.SWAP_PROGRAMS }}\" | wc -l)"
+          echo "LAUNCH_PROGRAMS lines: $(echo \"${{ vars.LAUNCH_PROGRAMS }}\" | wc -l)"
 
       - name: Run bot
         env:
           # RPC
           RPC_HTTP: https://api.mainnet-beta.solana.com
 
-          # Your inputs (set these in: Settings → Secrets and variables → Actions → Variables/Secrets)
+          # Inputs (set in Settings → Secrets and variables → Actions)
           WALLET_LIST:  ${{ vars.WALLET_LIST }}     # one wallet per line
           AMM_PROGRAMS: ${{ vars.AMM_PROGRAMS }}    # one program id per line
           SWAP_PROGRAMS: ${{ vars.SWAP_PROGRAMS }}  # one program id per line
@@ -40,11 +52,13 @@ jobs:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT:  ${{ secrets.TG_CHAT }}
 
-          # Connected-wallet scan knobs (tune if needed)
-          CONNECT_CHECKS_PER_RUN: "4"          # how many new connected wallets to mint-check per run
-          HISTORY_PAGES_PER_CONNECTED: "2"     # pages of history per connected wallet (2 × 100 tx)
-          HISTORY_PAGE_LIMIT: "100"            # tx per page
+          # Connected-wallet scan knobs
+          CONNECT_CHECKS_PER_RUN: "4"
+          HISTORY_PAGES_PER_CONNECTED: "2"
+          HISTORY_PAGE_LIMIT: "100"
 
+          # Verbose logs for troubleshooting (set to "0" later to reduce noise)
+          VERBOSE: "1"
         run: python bot.py
 
       - name: Save state back to repo

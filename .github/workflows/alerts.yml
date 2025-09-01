@@ -1,4 +1,4 @@
-name: solana-multiwallet-alerts
+name: so-m-ale
 
 on:
   schedule:

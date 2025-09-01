@@ -1459,3 +1459,10 @@
 2025-09-01 22:18:59,664 - INFO - [2AU5FmXiGcoscSd7SMSRAom9dwg38tUuUkHqTWaakqd8] last_sig: 4ELdQvVGkYQywvBQbnw3DbSmPez1KF2hrdSRMHu8sjzsB7eLWWdqkC7AGUZvfaTM8dNyQmWETZb9gH8HD2qhjBi9 | fetched: 34
 2025-09-01 22:18:59,665 - INFO - [2AU5FmXiGcoscSd7SMSRAom9dwg38tUuUkHqTWaakqd8] new_sigs: 0
 2025-09-01 22:18:59,865 - INFO - Saved state to state_1.json
+2025-09-01 22:19:15,788 - INFO - Shard 1/4 processing 1 wallet(s)
+2025-09-01 22:19:15,788 - INFO - Shard 1/4 processing 1 wallet(s)
+2025-09-01 22:19:15,788 - INFO - Processing wallet: 2AU5FmXiGcoscSd7SMSRAom9dwg38tUuUkHqTWaakqd8
+2025-09-01 22:19:15,788 - INFO - Processing wallet: 2AU5FmXiGcoscSd7SMSRAom9dwg38tUuUkHqTWaakqd8
+2025-09-01 22:19:16,078 - INFO - [2AU5FmXiGcoscSd7SMSRAom9dwg38tUuUkHqTWaakqd8] last_sig: 4ELdQvVGkYQywvBQbnw3DbSmPez1KF2hrdSRMHu8sjzsB7eLWWdqkC7AGUZvfaTM8dNyQmWETZb9gH8HD2qhjBi9 | fetched: 34
+2025-09-01 22:19:16,079 - INFO - [2AU5FmXiGcoscSd7SMSRAom9dwg38tUuUkHqTWaakqd8] new_sigs: 0
+2025-09-01 22:19:16,279 - INFO - Saved state to state_1.json

@@ -21,6 +21,7 @@ jobs:
           WALLET_LIST:  ${{ vars.WALLET_LIST }}
           AMM_PROGRAMS: ${{ vars.AMM_PROGRAMS }}
           SWAP_PROGRAMS:${{ vars.SWAP_PROGRAMS }}
+          LAUNCH_PROGRAMS:${{ vars.LAUNCH_PROGRAMS }}
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           # Optional Telegram:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}

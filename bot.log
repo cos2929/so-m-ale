@@ -538,3 +538,543 @@
 2025-09-01 20:17:02,387 - INFO - Shard 3/4 processing 0 wallet(s)
 2025-09-01 20:17:02,387 - INFO - Shard 3/4 processing 0 wallet(s)
 2025-09-01 20:17:02,387 - INFO - Saved state to state_3.json
+2025-09-01 20:18:32,541 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:18:32,541 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:18:32,541 - INFO - Saved state to state_3.json
+2025-09-01 20:18:47,669 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:18:47,669 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:18:47,670 - INFO - Saved state to state_3.json
+2025-09-01 20:19:02,803 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:19:02,803 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:19:02,804 - INFO - Saved state to state_3.json
+2025-09-01 20:19:17,935 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:19:17,935 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:19:17,935 - INFO - Saved state to state_3.json
+2025-09-01 20:19:33,067 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:19:33,067 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:19:33,068 - INFO - Saved state to state_3.json
+2025-09-01 20:19:48,200 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:19:48,200 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:19:48,201 - INFO - Saved state to state_3.json
+2025-09-01 20:20:03,336 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:20:03,336 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:20:03,337 - INFO - Saved state to state_3.json
+2025-09-01 20:20:18,469 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:20:18,469 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:20:18,469 - INFO - Saved state to state_3.json
+2025-09-01 20:20:33,598 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:20:33,598 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:20:33,598 - INFO - Saved state to state_3.json
+2025-09-01 20:20:48,725 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:20:48,725 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:20:48,725 - INFO - Saved state to state_3.json
+2025-09-01 20:21:03,855 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:21:03,855 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:21:03,856 - INFO - Saved state to state_3.json
+2025-09-01 20:21:18,995 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:21:18,995 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:21:18,995 - INFO - Saved state to state_3.json
+2025-09-01 20:21:34,128 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:21:34,128 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:21:34,129 - INFO - Saved state to state_3.json
+2025-09-01 20:21:49,279 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:21:49,279 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:21:49,279 - INFO - Saved state to state_3.json
+2025-09-01 20:22:04,406 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:22:04,406 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:22:04,407 - INFO - Saved state to state_3.json
+2025-09-01 20:22:19,539 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:22:19,539 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:22:19,540 - INFO - Saved state to state_3.json
+2025-09-01 20:22:34,671 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:22:34,671 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:22:34,672 - INFO - Saved state to state_3.json
+2025-09-01 20:22:49,801 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:22:49,801 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:22:49,801 - INFO - Saved state to state_3.json
+2025-09-01 20:23:04,934 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:23:04,934 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:23:04,935 - INFO - Saved state to state_3.json
+2025-09-01 20:23:20,068 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:23:20,068 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:23:20,068 - INFO - Saved state to state_3.json
+2025-09-01 20:23:35,200 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:23:35,200 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:23:35,200 - INFO - Saved state to state_3.json
+2025-09-01 20:23:50,331 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:23:50,331 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:23:50,331 - INFO - Saved state to state_3.json
+2025-09-01 20:24:05,464 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:24:05,464 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:24:05,465 - INFO - Saved state to state_3.json
+2025-09-01 20:24:20,592 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:24:20,592 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:24:20,592 - INFO - Saved state to state_3.json
+2025-09-01 20:24:35,724 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:24:35,724 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:24:35,724 - INFO - Saved state to state_3.json
+2025-09-01 20:24:50,860 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:24:50,860 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:24:50,861 - INFO - Saved state to state_3.json
+2025-09-01 20:25:05,994 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:25:05,994 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:25:05,995 - INFO - Saved state to state_3.json
+2025-09-01 20:25:21,127 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:25:21,127 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:25:21,128 - INFO - Saved state to state_3.json
+2025-09-01 20:25:36,260 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:25:36,260 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:25:36,260 - INFO - Saved state to state_3.json
+2025-09-01 20:25:51,396 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:25:51,396 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:25:51,397 - INFO - Saved state to state_3.json
+2025-09-01 20:26:06,533 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:26:06,533 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:26:06,534 - INFO - Saved state to state_3.json
+2025-09-01 20:26:21,670 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:26:21,670 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:26:21,670 - INFO - Saved state to state_3.json
+2025-09-01 20:26:36,803 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:26:36,803 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:26:36,803 - INFO - Saved state to state_3.json
+2025-09-01 20:26:51,938 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:26:51,938 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:26:51,938 - INFO - Saved state to state_3.json
+2025-09-01 20:27:07,076 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:27:07,076 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:27:07,076 - INFO - Saved state to state_3.json
+2025-09-01 20:27:22,211 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:27:22,211 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:27:22,211 - INFO - Saved state to state_3.json
+2025-09-01 20:27:37,341 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:27:37,341 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:27:37,342 - INFO - Saved state to state_3.json
+2025-09-01 20:27:52,476 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:27:52,476 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:27:52,477 - INFO - Saved state to state_3.json
+2025-09-01 20:28:07,613 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:28:07,613 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:28:07,613 - INFO - Saved state to state_3.json
+2025-09-01 20:28:22,745 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:28:22,745 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:28:22,745 - INFO - Saved state to state_3.json
+2025-09-01 20:28:37,873 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:28:37,873 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:28:37,874 - INFO - Saved state to state_3.json
+2025-09-01 20:28:53,001 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:28:53,001 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:28:53,001 - INFO - Saved state to state_3.json
+2025-09-01 20:29:08,131 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:29:08,131 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:29:08,131 - INFO - Saved state to state_3.json
+2025-09-01 20:29:23,260 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:29:23,261 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:29:23,261 - INFO - Saved state to state_3.json
+2025-09-01 20:29:38,394 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:29:38,394 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:29:38,395 - INFO - Saved state to state_3.json
+2025-09-01 20:29:53,530 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:29:53,530 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:29:53,530 - INFO - Saved state to state_3.json
+2025-09-01 20:30:08,665 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:30:08,665 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:30:08,665 - INFO - Saved state to state_3.json
+2025-09-01 20:30:23,800 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:30:23,801 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:30:23,801 - INFO - Saved state to state_3.json
+2025-09-01 20:30:38,937 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:30:38,937 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:30:38,937 - INFO - Saved state to state_3.json
+2025-09-01 20:30:54,074 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:30:54,074 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:30:54,074 - INFO - Saved state to state_3.json
+2025-09-01 20:31:09,212 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:31:09,212 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:31:09,212 - INFO - Saved state to state_3.json
+2025-09-01 20:31:24,344 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:31:24,344 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:31:24,344 - INFO - Saved state to state_3.json
+2025-09-01 20:31:39,473 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:31:39,473 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:31:39,473 - INFO - Saved state to state_3.json
+2025-09-01 20:31:54,608 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:31:54,608 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:31:54,609 - INFO - Saved state to state_3.json
+2025-09-01 20:32:09,745 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:32:09,745 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:32:09,746 - INFO - Saved state to state_3.json
+2025-09-01 20:32:24,875 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:32:24,875 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:32:24,875 - INFO - Saved state to state_3.json
+2025-09-01 20:32:40,007 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:32:40,007 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:32:40,007 - INFO - Saved state to state_3.json
+2025-09-01 20:32:55,143 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:32:55,144 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:32:55,144 - INFO - Saved state to state_3.json
+2025-09-01 20:33:10,279 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:33:10,279 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:33:10,279 - INFO - Saved state to state_3.json
+2025-09-01 20:33:25,410 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:33:25,410 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:33:25,410 - INFO - Saved state to state_3.json
+2025-09-01 20:33:40,539 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:33:40,539 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:33:40,539 - INFO - Saved state to state_3.json
+2025-09-01 20:33:55,671 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:33:55,672 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:33:55,672 - INFO - Saved state to state_3.json
+2025-09-01 20:34:10,808 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:34:10,808 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:34:10,808 - INFO - Saved state to state_3.json
+2025-09-01 20:34:25,947 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:34:25,947 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:34:25,947 - INFO - Saved state to state_3.json
+2025-09-01 20:34:41,088 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:34:41,088 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:34:41,088 - INFO - Saved state to state_3.json
+2025-09-01 20:34:56,223 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:34:56,223 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:34:56,224 - INFO - Saved state to state_3.json
+2025-09-01 20:35:11,353 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:35:11,353 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:35:11,353 - INFO - Saved state to state_3.json
+2025-09-01 20:35:26,484 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:35:26,484 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:35:26,484 - INFO - Saved state to state_3.json
+2025-09-01 20:35:41,619 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:35:41,619 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:35:41,619 - INFO - Saved state to state_3.json
+2025-09-01 20:35:56,752 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:35:56,752 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:35:56,752 - INFO - Saved state to state_3.json
+2025-09-01 20:36:11,888 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:36:11,888 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:36:11,888 - INFO - Saved state to state_3.json
+2025-09-01 20:36:27,027 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:36:27,027 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:36:27,027 - INFO - Saved state to state_3.json
+2025-09-01 20:36:42,161 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:36:42,161 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:36:42,162 - INFO - Saved state to state_3.json
+2025-09-01 20:36:57,290 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:36:57,290 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:36:57,290 - INFO - Saved state to state_3.json
+2025-09-01 20:37:12,420 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:37:12,420 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:37:12,420 - INFO - Saved state to state_3.json
+2025-09-01 20:37:27,551 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:37:27,551 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:37:27,551 - INFO - Saved state to state_3.json
+2025-09-01 20:37:42,683 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:37:42,684 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:37:42,684 - INFO - Saved state to state_3.json
+2025-09-01 20:37:57,816 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:37:57,816 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:37:57,817 - INFO - Saved state to state_3.json
+2025-09-01 20:38:12,952 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:38:12,952 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:38:12,953 - INFO - Saved state to state_3.json
+2025-09-01 20:38:28,086 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:38:28,086 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:38:28,086 - INFO - Saved state to state_3.json
+2025-09-01 20:38:43,217 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:38:43,218 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:38:43,218 - INFO - Saved state to state_3.json
+2025-09-01 20:38:58,353 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:38:58,353 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:38:58,353 - INFO - Saved state to state_3.json
+2025-09-01 20:39:13,489 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:39:13,489 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:39:13,489 - INFO - Saved state to state_3.json
+2025-09-01 20:39:28,621 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:39:28,621 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:39:28,621 - INFO - Saved state to state_3.json
+2025-09-01 20:39:43,751 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:39:43,751 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:39:43,751 - INFO - Saved state to state_3.json
+2025-09-01 20:39:58,887 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:39:58,887 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:39:58,888 - INFO - Saved state to state_3.json
+2025-09-01 20:40:14,017 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:40:14,017 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:40:14,018 - INFO - Saved state to state_3.json
+2025-09-01 20:40:29,146 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:40:29,146 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:40:29,146 - INFO - Saved state to state_3.json
+2025-09-01 20:40:44,275 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:40:44,275 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:40:44,276 - INFO - Saved state to state_3.json
+2025-09-01 20:40:59,404 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:40:59,404 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:40:59,404 - INFO - Saved state to state_3.json
+2025-09-01 20:41:14,541 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:41:14,541 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:41:14,541 - INFO - Saved state to state_3.json
+2025-09-01 20:41:29,676 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:41:29,676 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:41:29,676 - INFO - Saved state to state_3.json
+2025-09-01 20:41:44,814 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:41:44,814 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:41:44,815 - INFO - Saved state to state_3.json
+2025-09-01 20:41:59,955 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:41:59,955 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:41:59,955 - INFO - Saved state to state_3.json
+2025-09-01 20:42:15,090 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:42:15,090 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:42:15,090 - INFO - Saved state to state_3.json
+2025-09-01 20:42:30,225 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:42:30,225 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:42:30,225 - INFO - Saved state to state_3.json
+2025-09-01 20:42:45,356 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:42:45,356 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:42:45,357 - INFO - Saved state to state_3.json
+2025-09-01 20:43:00,490 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:43:00,490 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:43:00,490 - INFO - Saved state to state_3.json
+2025-09-01 20:43:15,619 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:43:15,619 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:43:15,619 - INFO - Saved state to state_3.json
+2025-09-01 20:43:30,748 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:43:30,748 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:43:30,748 - INFO - Saved state to state_3.json
+2025-09-01 20:43:45,881 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:43:45,881 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:43:45,881 - INFO - Saved state to state_3.json
+2025-09-01 20:44:01,014 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:44:01,015 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:44:01,015 - INFO - Saved state to state_3.json
+2025-09-01 20:44:16,144 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:44:16,144 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:44:16,145 - INFO - Saved state to state_3.json
+2025-09-01 20:44:31,273 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:44:31,273 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:44:31,273 - INFO - Saved state to state_3.json
+2025-09-01 20:44:46,407 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:44:46,407 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:44:46,407 - INFO - Saved state to state_3.json
+2025-09-01 20:45:01,539 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:45:01,539 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:45:01,539 - INFO - Saved state to state_3.json
+2025-09-01 20:45:16,668 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:45:16,668 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:45:16,668 - INFO - Saved state to state_3.json
+2025-09-01 20:45:31,796 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:45:31,796 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:45:31,796 - INFO - Saved state to state_3.json
+2025-09-01 20:45:46,925 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:45:46,925 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:45:46,925 - INFO - Saved state to state_3.json
+2025-09-01 20:46:02,057 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:46:02,058 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:46:02,058 - INFO - Saved state to state_3.json
+2025-09-01 20:46:17,192 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:46:17,193 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:46:17,193 - INFO - Saved state to state_3.json
+2025-09-01 20:46:32,334 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:46:32,334 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:46:32,334 - INFO - Saved state to state_3.json
+2025-09-01 20:46:47,475 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:46:47,476 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:46:47,476 - INFO - Saved state to state_3.json
+2025-09-01 20:47:02,608 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:47:02,609 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:47:02,609 - INFO - Saved state to state_3.json
+2025-09-01 20:47:17,736 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:47:17,736 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:47:17,736 - INFO - Saved state to state_3.json
+2025-09-01 20:47:32,864 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:47:32,864 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:47:32,865 - INFO - Saved state to state_3.json
+2025-09-01 20:47:47,995 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:47:47,995 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:47:47,995 - INFO - Saved state to state_3.json
+2025-09-01 20:48:03,127 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:48:03,127 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:48:03,128 - INFO - Saved state to state_3.json
+2025-09-01 20:48:18,258 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:48:18,258 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:48:18,258 - INFO - Saved state to state_3.json
+2025-09-01 20:48:33,387 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:48:33,387 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:48:33,388 - INFO - Saved state to state_3.json
+2025-09-01 20:48:48,519 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:48:48,519 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:48:48,520 - INFO - Saved state to state_3.json
+2025-09-01 20:49:03,657 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:49:03,657 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:49:03,658 - INFO - Saved state to state_3.json
+2025-09-01 20:49:18,800 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:49:18,800 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:49:18,801 - INFO - Saved state to state_3.json
+2025-09-01 20:49:33,931 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:49:33,931 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:49:33,932 - INFO - Saved state to state_3.json
+2025-09-01 20:49:49,064 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:49:49,064 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:49:49,064 - INFO - Saved state to state_3.json
+2025-09-01 20:50:04,202 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:50:04,202 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:50:04,202 - INFO - Saved state to state_3.json
+2025-09-01 20:50:19,338 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:50:19,338 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:50:19,338 - INFO - Saved state to state_3.json
+2025-09-01 20:50:34,470 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:50:34,470 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:50:34,470 - INFO - Saved state to state_3.json
+2025-09-01 20:50:49,608 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:50:49,608 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:50:49,609 - INFO - Saved state to state_3.json
+2025-09-01 20:51:04,750 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:51:04,750 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:51:04,751 - INFO - Saved state to state_3.json
+2025-09-01 20:51:19,883 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:51:19,883 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:51:19,883 - INFO - Saved state to state_3.json
+2025-09-01 20:51:35,012 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:51:35,012 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:51:35,012 - INFO - Saved state to state_3.json
+2025-09-01 20:51:50,146 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:51:50,146 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:51:50,146 - INFO - Saved state to state_3.json
+2025-09-01 20:52:05,279 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:52:05,279 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:52:05,279 - INFO - Saved state to state_3.json
+2025-09-01 20:52:20,416 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:52:20,416 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:52:20,416 - INFO - Saved state to state_3.json
+2025-09-01 20:52:35,556 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:52:35,556 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:52:35,556 - INFO - Saved state to state_3.json
+2025-09-01 20:52:50,687 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:52:50,687 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:52:50,687 - INFO - Saved state to state_3.json
+2025-09-01 20:53:05,816 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:53:05,816 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:53:05,816 - INFO - Saved state to state_3.json
+2025-09-01 20:53:20,945 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:53:20,945 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:53:20,946 - INFO - Saved state to state_3.json
+2025-09-01 20:53:36,075 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:53:36,075 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:53:36,076 - INFO - Saved state to state_3.json
+2025-09-01 20:53:51,206 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:53:51,206 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:53:51,206 - INFO - Saved state to state_3.json
+2025-09-01 20:54:06,343 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:54:06,343 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:54:06,344 - INFO - Saved state to state_3.json
+2025-09-01 20:54:21,476 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:54:21,476 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:54:21,477 - INFO - Saved state to state_3.json
+2025-09-01 20:54:36,613 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:54:36,613 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:54:36,613 - INFO - Saved state to state_3.json
+2025-09-01 20:54:51,751 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:54:51,751 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:54:51,751 - INFO - Saved state to state_3.json
+2025-09-01 20:55:06,887 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:55:06,887 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:55:06,888 - INFO - Saved state to state_3.json
+2025-09-01 20:55:22,020 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:55:22,020 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:55:22,021 - INFO - Saved state to state_3.json
+2025-09-01 20:55:37,147 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:55:37,147 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:55:37,147 - INFO - Saved state to state_3.json
+2025-09-01 20:55:52,280 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:55:52,280 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:55:52,280 - INFO - Saved state to state_3.json
+2025-09-01 20:56:07,415 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:56:07,415 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:56:07,416 - INFO - Saved state to state_3.json
+2025-09-01 20:56:22,548 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:56:22,548 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:56:22,548 - INFO - Saved state to state_3.json
+2025-09-01 20:56:37,682 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:56:37,682 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:56:37,682 - INFO - Saved state to state_3.json
+2025-09-01 20:56:52,820 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:56:52,820 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:56:52,820 - INFO - Saved state to state_3.json
+2025-09-01 20:57:07,950 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:57:07,950 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:57:07,950 - INFO - Saved state to state_3.json
+2025-09-01 20:57:23,081 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:57:23,081 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:57:23,081 - INFO - Saved state to state_3.json
+2025-09-01 20:57:38,210 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:57:38,210 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:57:38,210 - INFO - Saved state to state_3.json
+2025-09-01 20:57:53,345 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:57:53,345 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:57:53,346 - INFO - Saved state to state_3.json
+2025-09-01 20:58:08,481 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:58:08,481 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:58:08,482 - INFO - Saved state to state_3.json
+2025-09-01 20:58:23,618 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:58:23,618 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:58:23,619 - INFO - Saved state to state_3.json
+2025-09-01 20:58:38,752 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:58:38,752 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:58:38,752 - INFO - Saved state to state_3.json
+2025-09-01 20:58:53,885 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:58:53,885 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:58:53,886 - INFO - Saved state to state_3.json
+2025-09-01 20:59:09,020 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:59:09,021 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:59:09,021 - INFO - Saved state to state_3.json
+2025-09-01 20:59:24,150 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:59:24,150 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:59:24,150 - INFO - Saved state to state_3.json
+2025-09-01 20:59:39,281 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:59:39,281 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:59:39,282 - INFO - Saved state to state_3.json
+2025-09-01 20:59:54,417 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:59:54,417 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 20:59:54,417 - INFO - Saved state to state_3.json
+2025-09-01 21:00:09,547 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:00:09,547 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:00:09,548 - INFO - Saved state to state_3.json
+2025-09-01 21:00:24,678 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:00:24,678 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:00:24,678 - INFO - Saved state to state_3.json
+2025-09-01 21:00:39,806 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:00:39,806 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:00:39,807 - INFO - Saved state to state_3.json
+2025-09-01 21:00:54,940 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:00:54,940 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:00:54,941 - INFO - Saved state to state_3.json
+2025-09-01 21:01:10,078 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:01:10,078 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:01:10,078 - INFO - Saved state to state_3.json
+2025-09-01 21:01:25,209 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:01:25,209 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:01:25,209 - INFO - Saved state to state_3.json
+2025-09-01 21:01:40,340 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:01:40,340 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:01:40,341 - INFO - Saved state to state_3.json
+2025-09-01 21:01:55,470 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:01:55,470 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:01:55,471 - INFO - Saved state to state_3.json
+2025-09-01 21:02:10,603 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:02:10,603 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:02:10,603 - INFO - Saved state to state_3.json
+2025-09-01 21:02:25,733 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:02:25,733 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:02:25,734 - INFO - Saved state to state_3.json
+2025-09-01 21:02:40,865 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:02:40,865 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:02:40,865 - INFO - Saved state to state_3.json
+2025-09-01 21:02:56,000 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:02:56,000 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:02:56,000 - INFO - Saved state to state_3.json
+2025-09-01 21:03:11,133 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:03:11,133 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:03:11,133 - INFO - Saved state to state_3.json
+2025-09-01 21:03:26,268 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:03:26,268 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:03:26,268 - INFO - Saved state to state_3.json
+2025-09-01 21:03:41,401 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:03:41,401 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 21:03:41,402 - INFO - Saved state to state_3.json

@@ -1,8 +1,12 @@
 name: so-m-ale
 on:
   schedule:
-    - cron: "*/1 * * * *"   # run every minute
-  workflow_dispatch: {}     # allow manual trigger
+    - cron: "*/1 * * * *"   # every minute
+  workflow_dispatch: {}
+
+permissions:
+  contents: write   # required for saving state.json back to repo
+
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -14,12 +18,22 @@ jobs:
       - run: pip install requests
       - env:
           RPC_HTTP: https://api.mainnet-beta.solana.com
-
-          # We'll read the wallets from a repo VARIABLE so you can edit later without committing code.
-          WALLET_LIST: ${{ vars.WALLET_LIST }}
-
-          # Choose one or both alert methods:
+          WALLET_LIST:  ${{ vars.WALLET_LIST }}
+          AMM_PROGRAMS: ${{ vars.AMM_PROGRAMS }}
+          SWAP_PROGRAMS:${{ vars.SWAP_PROGRAMS }}
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          TG_TOKEN:        ${{ secrets.TG_TOKEN }}
-          TG_CHAT:         ${{ secrets.TG_CHAT }}
+          # Optional Telegram:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT:  ${{ secrets.TG_CHAT }}
         run: python bot.py
+
+      - name: Save state back to repo
+        if: always()
+        run: |
+          if [ -f state.json ]; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add state.json
+            git commit -m "chore: update state [skip ci]" || echo "no changes"
+            git push
+          fi

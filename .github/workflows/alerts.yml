@@ -1,26 +1,28 @@
-name: solana-multiwallet-alerts
+name: solana-multiwallet-alerts (10s loop)
 
 on:
   schedule:
-    - cron: "*/1 * * * *"   # runs every minute (UTC)
+    - cron: "0 * * * *"     # start once per hour (UTC)
   workflow_dispatch: {}      # manual "Run workflow" button
 
 permissions:
-  contents: write            # needed to push state.json back to the repo
+  contents: write            # to push state.json
 
+# Do NOT cancel the in-progress hourly run; queue the next one
 concurrency:
   group: solana-alerts
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   alerts:
     runs-on: ubuntu-latest
+    timeout-minutes: 355     # safety (max 6h for Actions; we run ~55m)
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          persist-credentials: true   # keep GITHUB_TOKEN for push
+          persist-credentials: true
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -48,12 +50,19 @@ jobs:
           echo "SWAP_PROGRAMS lines: $(printf '%s\n' "$SWAP_PROGRAMS" | sed '/^\s*$/d;/^\s*#/d' | wc -l)"
           echo "LAUNCH_PROGRAMS lines: $(printf '%s\n' "$LAUNCH_PROGRAMS" | sed '/^\s*$/d;/^\s*#/d' | wc -l)"
 
-      - name: Run bot
+      - name: Prepare Git for pushing state.json
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          BRANCH="${GITHUB_REF_NAME:-$GITHUB_HEAD_REF}"
+          git fetch origin "$BRANCH" || true
+          git pull --rebase origin "$BRANCH" || true
+
+      - name: Run bot loop (every 10 seconds for ~55 minutes)
         env:
-          # RPC
+          # RPC endpoint
           RPC_HTTP: https://api.mainnet-beta.solana.com
 
-          # Inputs (set in Settings → Secrets and variables → Actions)
+          # Inputs (set these in Settings → Secrets and variables → Actions)
           WALLET_LIST:  ${{ vars.WALLET_LIST }}     # one wallet per line
           AMM_PROGRAMS: ${{ vars.AMM_PROGRAMS }}    # one program id per line
           SWAP_PROGRAMS: ${{ vars.SWAP_PROGRAMS }}  # one program id per line
@@ -64,24 +73,41 @@ jobs:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT:  ${{ secrets.TG_CHAT }}
 
-          # Connected-wallet scan knobs
+          # Bot tuning knobs
           CONNECT_CHECKS_PER_RUN: "4"
           HISTORY_PAGES_PER_CONNECTED: "2"
           HISTORY_PAGE_LIMIT: "100"
-
-          # Verbose logs for troubleshooting (turn to "0" later)
           VERBOSE: "1"
-        run: python bot.py
 
-      - name: Prepare Git for pushing state.json
-        if: always()
+          # Loop controls
+          INTERVAL_SECONDS: "10"   # <-- your 10s interval
+          MAX_LOOPS: "330"         # 330 * 10s ≈ 55 minutes
+        shell: bash
         run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          BRANCH="${GITHUB_REF_NAME:-$GITHUB_HEAD_REF}"
-          git fetch origin "$BRANCH" || true
-          git pull --rebase origin "$BRANCH" || true
+          echo "Starting loop: every ${INTERVAL_SECONDS}s, ${MAX_LOOPS} iterations (~55m)"
+          for i in $(seq 1 "$MAX_LOOPS"); do
+            echo "::group::iteration $i"
+            python bot.py || echo "bot.py exited with $?"
+            echo "::endgroup::"
 
-      - name: Save state back to repo
+            # checkpoint state every 60 iterations (~10 minutes)
+            if [ $((i % 60)) -eq 0 ]; then
+              if [ -f state.json ]; then
+                git config user.name  "github-actions[bot]"
+                git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                git add state.json
+                git commit -m "chore: checkpoint state (iter $i) [skip ci]" || true
+                git push || true
+              fi
+            fi
+
+            # avoid sleeping after the last iteration
+            if [ "$i" -lt "$MAX_LOOPS" ]; then
+              sleep "$INTERVAL_SECONDS"
+            fi
+          done
+
+      - name: Final save state
         if: always()
         run: |
           if [ -f state.json ]; then

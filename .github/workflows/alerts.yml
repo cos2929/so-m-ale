@@ -1,9 +1,7 @@
-name: so-m-ale alerts (15s loop, sharded)
+name: so-m-ale alerts (continuous run, manual start/stop)
 
 on:
-  schedule:
-    - cron: "0 * * * *"     # hourly (UTC)
-  workflow_dispatch: {}      # manual trigger
+  workflow_dispatch: {}      # manual trigger only
 
 permissions:
   contents: write
@@ -54,11 +52,13 @@ jobs:
       - name: Prepare Git
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           BRANCH="${GITHUB_REF_NAME:-$GITHUB_HEAD_REF}"
           git fetch origin "$BRANCH" || true
           git pull --rebase origin "$BRANCH" || true
 
-      - name: Run bot loop (every 15s, ~45 minutes)
+      - name: Run bot (continuous until cancelled)
         env:
           RPC_HTTP: https://api.mainnet-beta.solana.com
           WALLET_LIST:  ${{ vars.WALLET_LIST }}
@@ -74,33 +74,22 @@ jobs:
           SHARD_TOTAL: "4"
           STATE_FILE: state_${{ matrix.shard_index }}.json
           INTERVAL_SECONDS: "15"
-          MAX_LOOPS: "180"
         shell: bash
         run: |
-          echo "Shard $SHARD_INDEX/$SHARD_TOTAL — loop every ${INTERVAL_SECONDS}s for ${MAX_LOOPS} iterations"
-          for i in $(seq 1 "$MAX_LOOPS"); do
-            echo "::group::shard $SHARD_INDEX iteration $i"
+          echo "Shard $SHARD_INDEX/$SHARD_TOTAL — running continuously until cancelled, checking every ${INTERVAL_SECONDS}s"
+          while true; do
+            echo "::group::shard $SHARD_INDEX iteration $((i++))"
             python bot.py || echo "bot.py exit code $?"
-            echo "::endgroup::"
-            if [ "$i" -lt "$MAX_LOOPS" ]; then
-              sleep "$INTERVAL_SECONDS"
+            if [ -f "$STATE_FILE" ]; then
+              git add "$STATE_FILE"
+              git commit -m "chore: update $STATE_FILE [skip ci]" || echo "No state changes"
+              git push || echo "Push failed; continuing"
             fi
+            if [ -f "bot.log" ]; then
+              git add "bot.log"
+              git commit -m "chore: update bot.log [skip ci]" || echo "No log changes"
+              git push || echo "Push failed; continuing"
+            fi
+            echo "::endgroup::"
+            sleep "$INTERVAL_SECONDS"
           done
-
-      - name: Final save
-        if: always()
-        env:
-          STATE_FILE: state_${{ matrix.shard_index }}.json
-        run: |
-          if [ -f "$STATE_FILE" ]; then
-            git config user.name  "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add "$STATE_FILE"
-            git commit -m "chore: update $STATE_FILE [skip ci]" || echo "No changes"
-            git push || echo "Push failed; skipping"
-          fi
-          if [ -f "bot.log" ]; then
-            git add "bot.log"
-            git commit -m "chore: update bot.log [skip ci]" || echo "No log changes"
-            git push || echo "Push failed; skipping"
-          fi

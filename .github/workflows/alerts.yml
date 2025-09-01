@@ -1,0 +1,25 @@
+name: so-m-ale
+on:
+  schedule:
+    - cron: "*/1 * * * *"   # run every minute
+  workflow_dispatch: {}     # allow manual trigger
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install requests
+      - env:
+          RPC_HTTP: https://api.mainnet-beta.solana.com
+
+          # We'll read the wallets from a repo VARIABLE so you can edit later without committing code.
+          WALLET_LIST: ${{ vars.WALLET_LIST }}
+
+          # Choose one or both alert methods:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          TG_TOKEN:        ${{ secrets.TG_TOKEN }}
+          TG_CHAT:         ${{ secrets.TG_CHAT }}
+        run: python bot.py

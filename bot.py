@@ -295,12 +295,20 @@ def find_mints_in_account_history(wallet, pages=2, limit=100):
         params = [wallet, {"limit": limit}]
         if before:
             params[1]["before"] = before
-        sigs = rpc("getSignaturesForAddress", params)
+        try:
+            sigs = rpc("getSignaturesForAddress", params)
+        except Exception as e:
+            print(f"[history {wallet}] signatures error:", e)
+            break
         if not sigs:
             break
         for s in sigs:
             sig = s["signature"]
-            tx = rpc("getTransaction", [sig, {"encoding": "json", "maxSupportedTransactionVersion": 0}])
+            try:
+                tx = rpc("getTransaction", [sig, {"encoding": "json", "maxSupportedTransactionVersion": 0}])
+            except Exception as e:
+                print(f"[history {wallet}] tx error {sig}:", e)
+                continue
             if not tx:
                 continue
             if logs_contain_initialize_mint(tx):
@@ -328,8 +336,15 @@ def process_wallet(wallet, st):
     pending_checks = st.get("_pending_mint_checks", [])   # queue of addresses to check
 
     # Fetch latest signatures (large headroom), then process only new ones
-    params = [wallet, {"limit": 200}]
-    sigs = rpc("getSignaturesForAddress", params) or []
+    try:
+        sigs = rpc("getSignaturesForAddress", [wallet, {"limit": 200}]) or []
+    except Exception as e:
+        print(f"[{wallet}] signatures error:", e)
+        st[wallet] = wstate
+        st["_connected_info"] = connected_info
+        st["_pending_mint_checks"] = pending_checks
+        return st
+
     vlog(f"[{wallet}] last_sig:", last, "| fetched:", len(sigs))
 
     new_sigs = []
@@ -343,141 +358,132 @@ def process_wallet(wallet, st):
         sig = s["signature"]
         try:
             tx = rpc("getTransaction", [sig, {"encoding": "json", "maxSupportedTransactionVersion": 0}])
-            if not tx:
-                continue
-
-            # 0) LAUNCH (pump.fun etc.)
-            launch_hits = detect_launch_activity(tx)
-            if launch_hits:
-                candidates = set(extract_mint_candidates(tx))
-                for hit in launch_hits:
-                    for a in (hit.get("accounts") or [])[:6]:
-                        if a and len(a) >= 32:
-                            candidates.add(a)
-
-                resolved_lines = []
-                for mint in list(candidates)[:6]:
-                    name, sym = fetch_token_name_symbol(mint)
-                    label = f" — {name} ({sym})" if (name or sym) else ""
-                    resolved_lines.append(f"• {mint}{label}\n  https://solscan.io/token/{mint}")
-
-                lines = [
-                    "🚀 Launch activity detected",
-                    f"Wallet: `{wallet}`",
-                    f"Tx: https://solscan.io/tx/{sig}"
-                ]
-                if resolved_lines:
-                    lines.append("Possible token mints:")
-                    lines += resolved_lines
-                alert("\n".join(lines))
-
-            # 1) NEW TOKEN MINT (InitializeMint/InitializeMint2)
-            if logs_contain_initialize_mint(tx):
-                mints = extract_mint_candidates(tx)
-                for mint in mints:
-                    name, sym = fetch_token_name_symbol(mint)
-                    name_line = f"\nName: {name} ({sym})" if (name or sym) else ""
-                    alert("🚨 Token mint detected"
-                          f"\nWallet: `{wallet}`"
-                          f"\nMint: `{mint}`{name_line}"
-                          f"\nToken: https://solscan.io/token/{mint}"
-                          f"\nTx: https://solscan.io/tx/{sig}")
-
-            # 1b) SUPPLY MINTING (MintTo / MintToChecked)
-            if logs_contain_mint_to(tx):
-                mints = extract_mint_to_candidates(tx)
-                lines = [f"🪙 Supply minted (MintTo)",
-                         f"Wallet: `{wallet}`",
-                         f"Tx: https://solscan.io/tx/{sig}"]
-                shown = 0
-                for mint in mints[:6]:
-                    name, sym = fetch_token_name_symbol(mint)
-                    label = f" — {name} ({sym})" if (name or sym) else ""
-                    lines.append(f"• Mint: {mint}{label}\n  Token: https://solscan.io/token/{mint}")
-                    shown += 1
-                if shown:
-                    alert("\n".join(lines))
-
-            # 2) LP-related activity (AMMs)
-            lp_hits = detect_lp_activity(tx)
-            if lp_hits and wallet in get_signers(tx):
-                newly_found = set()
-                for hit in lp_hits:
-                    for a in (hit.get("accounts") or []):
-                        if a and len(a) >= 32 and a not in known_lp:
-                            newly_found.add(a)
-                if newly_found:
-                    known_lp |= newly_found
-                    wstate["lp_accounts"] = sorted(known_lp)
-
-                lines = [f"🧪 LP-related activity",
-                         f"Wallet: `{wallet}`",
-                         f"Tx: https://solscan.io/tx/{sig}"]
-                if newly_found:
-                    sample = list(newly_found)[:5]
-                    extra = "" if len(newly_found) <= 5 else f" (+{len(newly_found)-5} more)"
-                    lines.append("New LP/pool addresses:\n" + "\n".join(f"• {x}" for x in sample) + extra)
-                else:
-                    sample = []
-                    for hit in lp_hits:
-                        sample += (hit.get("accounts") or [])
-                        if len(sample) >= 5: break
-                    if sample:
-                        lines.append("Accounts (sample):\n" + "\n".join(f"• {x}" for x in sample[:5]))
-                alert("\n".join(lines))
-
-            # 3) SWAP detection
-            if detect_swap_activity(tx) and wallet in get_signers(tx):
-                deltas = token_transfer_deltas_for_wallet(tx, wallet)
-                lines = [f"🔄 Swap-related activity",
-                         f"Wallet: `{wallet}`",
-                         f"Tx: https://solscan.io/tx/{sig}"]
-                if deltas:
-                    for d in deltas[:4]:
-                        dir_ = "➕" if d["delta_ui"] > 0 else "➖"
-                        lines.append(f"{dir_} {abs(d['delta_ui'])} of {d['mint']}")
-                    if len(deltas) > 4:
-                        lines.append(f"(+{len(deltas)-4} more deltas)")
-                alert("\n".join(lines))
-
-            # 4) TRANSFERS summary (SPL + SOL)
-            tok_deltas = token_transfer_deltas_for_wallet(tx, wallet)
-            sol_delta  = sol_transfer_deltas_for_wallet(tx, wallet)
-            if (tok_deltas and any(abs(d['delta_ui']) > 0 for d in tok_deltas)) or (sol_delta and abs(sol_delta) > 0):
-                lines = [f"💸 Transfer activity",
-                         f"Wallet: `{wallet}`",
-                         f"Tx: https://solscan.io/tx/{sig}"]
-                if sol_delta and abs(sol_delta) > 0:
-                    arrow = "➕" if sol_delta > 0 else "➖"
-                    lines.append(f"{arrow} {abs(sol_delta):,.9f} SOL")
-                for d in tok_deltas[:5]:
-                    dir_ = "➕" if d["delta_ui"] > 0 else "➖"
-                    lines.append(f"{dir_} {abs(d['delta_ui'])} of {d['mint']}")
-                if len(tok_deltas) > 5:
-                    lines.append(f"(+{len(tok_deltas)-5} more token changes)")
-                alert("\n".join(lines))
-
-            # 5) CONNECTED WALLETS (discover)
-            newly_conn = extract_connected_wallets_from_tx(tx, wallet) - known_connected
-            if newly_conn:
-                known_connected |= newly_conn
-                wstate["connected"] = sorted(known_connected)
-                sample = list(newly_conn)[:8]
-                extra = "" if len(newly_conn) <= 8 else f" (+{len(newly_conn)-8} more)"
-                alert("🕸️ New connected addresses"
-                      f"\nWallet: `{wallet}`\n"
-                      + "\n".join(f"• {a}" for a in sample) + extra
-                      + f"\nTx: https://solscan.io/tx/{sig}")
-
-                # Queue for mint-history checks
-                for addr in newly_conn:
-                    info = connected_info.get(addr) or {}
-                    if not info.get("checked"):
-                        connected_info[addr] = info
-                        pending_checks.append(addr)
-
         except Exception as e:
             print(f"[{wallet}] tx error for {sig}:", e)
+            continue
+        if not tx:
+            continue
+
+        # 0) LAUNCH (pump.fun etc.)
+        launch_hits = detect_launch_activity(tx)
+        if launch_hits:
+            candidates = set(extract_mint_candidates(tx))
+            for hit in launch_hits:
+                for a in (hit.get("accounts") or [])[:6]:
+                    if a and len(a) >= 32:
+                        candidates.add(a)
+
+            resolved_lines = []
+            for mint in list(candidates)[:6]:
+                name, sym = fetch_token_name_symbol(mint)
+                label = f" — {name} ({sym})" if (name or sym) else ""
+                resolved_lines.append(f"• {mint}{label}\n  https://solscan.io/token/{mint}")
+
+            lines = [
+                "🚀 Launch activity detected",
+                f"Wallet: `{wallet}`",
+                f"Tx: https://solscan.io/tx/{sig}"
+            ]
+            if resolved_lines:
+                lines.append("Possible token mints:")
+                lines += resolved_lines
+            alert("\n".join(lines))
+
+        # 1) NEW TOKEN MINT (InitializeMint/InitializeMint2)
+        if logs_contain_initialize_mint(tx):
+            mints = extract_mint_candidates(tx)
+            for mint in mints:
+                name, sym = fetch_token_name_symbol(mint)
+                name_line = f"\nName: {name} ({sym})" if (name or sym) else ""
+                alert("🚨 Token mint detected"
+                      f"\nWallet: `{wallet}`"
+                      f"\nMint: `{mint}`{name_line}"
+                      f"\nToken: https://solscan.io/token/{mint}"
+                      f"\nTx: https://solscan.io/tx/{sig}")
+
+        # 1b) SUPPLY MINTING (MintTo / MintToChecked)
+        if logs_contain_mint_to(tx):
+            mints = extract_mint_to_candidates(tx)
+            lines = [f"🪙 Supply minted (MintTo)",
+                     f"Wallet: `{wallet}`",
+                     f"Tx: https://solscan.io/tx/{sig}"]
+            for mint in mints[:6]:
+                name, sym = fetch_token_name_symbol(mint)
+                label = f" — {name} ({sym})" if (name or sym) else ""
+                lines.append(f"• Mint: {mint}{label}\n  Token: https://solscan.io/token/{mint}")
+            if len(lines) > 3:
+                alert("\n".join(lines))
+
+        # 2) LP-related activity (AMMs)
+        lp_hits = detect_lp_activity(tx)
+        if lp_hits and wallet in get_signers(tx):
+            newly_found = set()
+            for hit in lp_hits:
+                for a in (hit.get("accounts") or []):
+                    if a and len(a) >= 32 and a not in known_lp:
+                        newly_found.add(a)
+            if newly_found:
+                known_lp |= newly_found
+                wstate["lp_accounts"] = sorted(known_lp)
+
+            lines = [f"🧪 LP-related activity",
+                     f"Wallet: `{wallet}`",
+                     f"Tx: https://solscan.io/tx/{sig}"]
+            if newly_found:
+                sample = list(newly_found)[:5]
+                extra = "" if len(newly_found) <= 5 else f" (+{len(newly_found)-5} more)"
+                lines.append("New LP/pool addresses:\n" + "\n".join(f"• {x}" for x in sample) + extra)
+            alert("\n".join(lines))
+
+        # 3) SWAP detection
+        if detect_swap_activity(tx) and wallet in get_signers(tx):
+            deltas = token_transfer_deltas_for_wallet(tx, wallet)
+            lines = [f"🔄 Swap-related activity",
+                     f"Wallet: `{wallet}`",
+                     f"Tx: https://solscan.io/tx/{sig}"]
+            if deltas:
+                for d in deltas[:4]:
+                    dir_ = "➕" if d["delta_ui"] > 0 else "➖"
+                    lines.append(f"{dir_} {abs(d['delta_ui'])} of {d['mint']}")
+                if len(deltas) > 4:
+                    lines.append(f"(+{len(deltas)-4} more deltas)")
+            alert("\n".join(lines))
+
+        # 4) TRANSFERS summary (SPL + SOL)
+        tok_deltas = token_transfer_deltas_for_wallet(tx, wallet)
+        sol_delta  = sol_transfer_deltas_for_wallet(tx, wallet)
+        if (tok_deltas and any(abs(d['delta_ui']) > 0 for d in tok_deltas)) or (sol_delta and abs(sol_delta) > 0):
+            lines = [f"💸 Transfer activity",
+                     f"Wallet: `{wallet}`",
+                     f"Tx: https://solscan.io/tx/{sig}"]
+            if sol_delta and abs(sol_delta) > 0:
+                arrow = "➕" if sol_delta > 0 else "➖"
+                lines.append(f"{arrow} {abs(sol_delta):,.9f} SOL")
+            for d in tok_deltas[:5]:
+                dir_ = "➕" if d["delta_ui"] > 0 else "➖"
+                lines.append(f"{dir_} {abs(d['delta_ui'])} of {d['mint']}")
+            if len(tok_deltas) > 5:
+                lines.append(f"(+{len(tok_deltas)-5} more token changes)")
+            alert("\n".join(lines))
+
+        # 5) CONNECTED WALLETS (discover)
+        newly_conn = extract_connected_wallets_from_tx(tx, wallet) - known_connected
+        if newly_conn:
+            known_connected |= newly_conn
+            wstate["connected"] = sorted(known_connected)
+            sample = list(newly_conn)[:8]
+            extra = "" if len(newly_conn) <= 8 else f" (+{len(newly_conn)-8} more)"
+            alert("🕸️ New connected addresses"
+                  f"\nWallet: `{wallet}`\n"
+                  + "\n".join(f"• {a}" for a in sample) + extra
+                  + f"\nTx: https://solscan.io/tx/{sig}")
+
+            # Queue for mint-history checks
+            for addr in newly_conn:
+                info = connected_info.get(addr) or {}
+                if not info.get("checked"):
+                    connected_info[addr] = info
+                    pending_checks.append(addr)
 
         # advance last_sig after each processed signature
         wstate["last_sig"] = sig

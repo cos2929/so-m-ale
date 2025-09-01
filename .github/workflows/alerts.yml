@@ -82,6 +82,9 @@ jobs:
           HISTORY_PAGE_LIMIT: "100"
           VERBOSE: "1"
 
+          # NEW: minimum SOL delta to alert transfers
+          MIN_SOL_TRANSFER: "1"
+
           # Shard info
           SHARD_INDEX: ${{ matrix.shard_index }}
           SHARD_TOTAL: "4"

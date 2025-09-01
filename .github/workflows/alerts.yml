@@ -1,4 +1,4 @@
-name: so-m-ale
+name: solana-multiwallet-alerts
 
 on:
   schedule:
@@ -30,13 +30,13 @@ jobs:
       - name: Install dependencies
         run: pip install "requests>=2.31,<2.33"
 
-      # ✅ SAFE summary for multi-line vars (fixes your error)
+      # SAFE summary for multi-line vars (doesn't expose secrets)
       - name: Config summary (safe)
         env:
-          WALLET_LIST: ${{ vars.WALLET_LIST }}
-          AMM_PROGRAMS: ${{ vars.AMM_PROGRAMS }}
-          SWAP_PROGRAMS: ${{ vars.SWAP_PROGRAMS }}
-          LAUNCH_PROGRAMS: ${{ vars.LAUNCH_PROGRAMS }}
+          WALLET_LIST:    ${{ vars.WALLET_LIST }}
+          AMM_PROGRAMS:   ${{ vars.AMM_PROGRAMS }}
+          SWAP_PROGRAMS:  ${{ vars.SWAP_PROGRAMS }}
+          LAUNCH_PROGRAMS:${{ vars.LAUNCH_PROGRAMS }}
         run: |
           if [ -n "$WALLET_LIST" ]; then
             echo "Has WALLET_LIST: yes"
@@ -44,7 +44,6 @@ jobs:
           else
             echo "Has WALLET_LIST: no"
           fi
-
           echo "AMM_PROGRAMS lines:  $(printf '%s\n' "$AMM_PROGRAMS"  | sed '/^\s*$/d;/^\s*#/d' | wc -l)"
           echo "SWAP_PROGRAMS lines: $(printf '%s\n' "$SWAP_PROGRAMS" | sed '/^\s*$/d;/^\s*#/d' | wc -l)"
           echo "LAUNCH_PROGRAMS lines: $(printf '%s\n' "$LAUNCH_PROGRAMS" | sed '/^\s*$/d;/^\s*#/d' | wc -l)"

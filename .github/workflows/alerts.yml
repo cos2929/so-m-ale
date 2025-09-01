@@ -36,7 +36,7 @@ jobs:
           WALLET_LIST:    ${{ vars.WALLET_LIST }}
           AMM_PROGRAMS:   ${{ vars.AMM_PROGRAMS }}
           SWAP_PROGRAMS:  ${{ vars.SWAP_PROGRAMS }}
-          LAUNCH_PROGRAMS:${{ vars.LAUNCH_PROGRAMS }}
+          LAUNCH_PROGRAMS: ${{ vars.LAUNCH_PROGRAMS }}
         run: |
           if [ -n "$WALLET_LIST" ]; then
             echo "Has WALLET_LIST: yes"

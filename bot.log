@@ -1141,3 +1141,6 @@
 2025-09-01 22:06:46,091 - INFO - [6hQ1yfJK5QWa1YPvzYoXtU1ErmZwtemfmtfXaxREctK2] last_sig: 2PqbUqYL5Tgs4Gc2AXYrHmpZure4fuFAdEipdwW36934S2EJc1ApXVZEjV7VcgjPejUNPwXitavuX6oPnEvNKvtB | fetched: 178
 2025-09-01 22:06:46,092 - INFO - [6hQ1yfJK5QWa1YPvzYoXtU1ErmZwtemfmtfXaxREctK2] new_sigs: 0
 2025-09-01 22:06:46,292 - INFO - Saved state to state_2.json
+2025-09-01 22:06:47,940 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 22:06:47,941 - INFO - Shard 3/4 processing 0 wallet(s)
+2025-09-01 22:06:47,941 - INFO - Saved state to state_3.json

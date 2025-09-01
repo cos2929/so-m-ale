@@ -9,9 +9,10 @@ DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK")
 TG_TOKEN = os.getenv("TG_TOKEN")
 TG_CHAT  = os.getenv("TG_CHAT")
 
-# Programs to flag as LP / Swap related (Raydium/Orca/Meteora/etc) – set via repo Variables.
-AMM_PROGRAMS_RAW  = os.getenv("AMM_PROGRAMS", "").strip()
-SWAP_PROGRAMS_RAW = os.getenv("SWAP_PROGRAMS", "").strip()
+# Programs to flag as LP / Swap / Launch related (set via repo Variables).
+AMM_PROGRAMS_RAW   = os.getenv("AMM_PROGRAMS", "").strip()
+SWAP_PROGRAMS_RAW  = os.getenv("SWAP_PROGRAMS", "").strip()
+LAUNCH_PROGRAMS_RAW= os.getenv("LAUNCH_PROGRAMS", "").strip()  # e.g. pump.fun
 
 # Known base programs
 SYSTEM_PROGRAM = "11111111111111111111111111111111"
@@ -19,7 +20,7 @@ TOKEN_PROGRAMS = {
     "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",  # SPL Token
     "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",  # Token-2022
 }
-# Metaplex Token Metadata program (fixed address)
+# Metaplex Token Metadata (v1) program (mainnet)
 METADATA_PROGRAM = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 
 def parse_list_env(value: str):
@@ -29,8 +30,9 @@ def parse_list_env(value: str):
         return [v.strip() for v in value.splitlines() if v.strip() and not v.strip().startswith("#")]
     return [v.strip() for v in value.split(",") if v.strip() and not v.strip().startswith("#")]
 
-AMM_PROGRAMS  = set(parse_list_env(AMM_PROGRAMS_RAW))
-SWAP_PROGRAMS = set(parse_list_env(SWAP_PROGRAMS_RAW)) or set(parse_list_env(AMM_PROGRAMS_RAW))  # fallback
+AMM_PROGRAMS   = set(parse_list_env(AMM_PROGRAMS_RAW))
+SWAP_PROGRAMS  = set(parse_list_env(SWAP_PROGRAMS_RAW)) or set(parse_list_env(AMM_PROGRAMS_RAW))  # fallback to AMM list
+LAUNCH_PROGRAMS= set(parse_list_env(LAUNCH_PROGRAMS_RAW))
 
 def rpc(method, params):
     r = requests.post(RPC_HTTP, json={"jsonrpc":"2.0","id":1,"method":method,"params":params}, timeout=25)
@@ -113,7 +115,7 @@ def instructions_iter(tx):
             prog = ix.get("programId")
             if not prog and "programIdIndex" in ix:
                 pidx = ix["programIdIndex"]
-                prog = keys[pidx] if isinstance(pidx, int) and idx < len(keys) else None
+                prog = keys[pidx] if isinstance(pidx, int) and pidx < len(keys) else None
             accs = [resolve_account(a, keys) for a in (ix.get("accounts") or [])]
             yield (prog, accs)
 
@@ -161,12 +163,10 @@ def fetch_token_name_symbol(mint_pubkey):
 
         name, off = read_str(raw, off)
         symbol, off = read_str(raw, off)
-        # uri, off = read_str(raw, off)  # not needed now
-        name = name.strip()
-        symbol = symbol.strip()
+        name = (name or "").strip()
+        symbol = (symbol or "").strip()
         return (name or None, symbol or None)
     except Exception:
-        # Metadata might not exist or be non-standard; that's fine.
         return (None, None)
 
 def detect_lp_activity(tx):
@@ -183,6 +183,14 @@ def detect_swap_activity(tx):
         if prog in SWAP_PROGRAMS:
             return True
     return False
+
+def detect_launch_activity(tx):
+    """Return list of launch-program hits (e.g., pump.fun)."""
+    hits = []
+    for prog, accs in instructions_iter(tx):
+        if prog in LAUNCH_PROGRAMS:
+            hits.append({"program": prog, "accounts": accs})
+    return hits
 
 def token_transfer_deltas_for_wallet(tx, wallet):
     """
@@ -202,9 +210,8 @@ def token_transfer_deltas_for_wallet(tx, wallet):
     deltas = []
     owners = set([k[1] for k in list(pre_map.keys()) + list(post_map.keys())])
     for own in owners:
-        if own != wallet:  # focus on changes to THIS wallet's token holdings
+        if own != wallet:
             continue
-        # collect mints for this owner
         mints = set([m for (m,o) in pre_map.keys() if o==own] + [m for (m,o) in post_map.keys() if o==own])
         for mint in mints:
             pre_amt = (pre_map.get((mint, own)) or {}).get("uiTokenAmount", {}).get("uiAmount", 0.0) or 0.0
@@ -261,7 +268,35 @@ def process_wallet(wallet, st):
             if not tx:
                 continue
 
-            # 1) MINT alerts (with name/symbol if we can read metadata)
+            # --- 0) LAUNCH (pump.fun etc.) ---
+            launch_hits = detect_launch_activity(tx)
+            if launch_hits:
+                # candidate mints: token-program first accounts + a few accounts from launch instructions
+                candidates = set(extract_mint_candidates(tx))
+                for hit in launch_hits:
+                    for a in (hit.get("accounts") or [])[:6]:
+                        if a and len(a) >= 32:
+                            candidates.add(a)
+
+                resolved_lines = []
+                ordered = list(candidates)[:6]
+                for mint in ordered:
+                    name, sym = fetch_token_name_symbol(mint)
+                    label = f" — {name} ({sym})" if (name or sym) else ""
+                    resolved_lines.append(f"• {mint}{label}\n  https://solscan.io/token/{mint}")
+
+                lines = [
+                    "🚀 Launch activity detected (pump.fun)",
+                    f"Wallet: `{wallet}`",
+                    f"Tx: https://solscan.io/tx/{sig}"
+                ]
+                if resolved_lines:
+                    lines.append("Possible token mints:")
+                    lines += resolved_lines
+
+                alert("\n".join(lines))
+
+            # --- 1) MINT alerts (with token name/symbol if available) ---
             if logs_contain_initialize_mint(tx):
                 mints = extract_mint_candidates(tx)
                 for mint in mints:
@@ -273,15 +308,14 @@ def process_wallet(wallet, st):
                           f"\nToken: https://solscan.io/token/{mint}"
                           f"\nTx: https://solscan.io/tx/{sig}")
 
-            # 2) LP-related activity (AMM programs)
+            # --- 2) LP-related activity (AMMs) ---
             lp_hits = detect_lp_activity(tx)
             if lp_hits and wallet in get_signers(tx):
                 newly_found = set()
                 for hit in lp_hits:
                     for a in (hit.get("accounts") or []):
-                        if a and len(a) >= 32:  # rough filter for pubkeys
-                            if a not in known_lp:
-                                newly_found.add(a)
+                        if a and len(a) >= 32 and a not in known_lp:
+                            newly_found.add(a)
                 if newly_found:
                     known_lp |= newly_found
                     wstate["lp_accounts"] = sorted(known_lp)
@@ -302,7 +336,7 @@ def process_wallet(wallet, st):
                         lines.append("Accounts (sample):\n" + "\n".join(f"• {x}" for x in sample[:5]))
                 alert("\n".join(lines))
 
-            # 3) SWAP detection
+            # --- 3) SWAP detection ---
             if detect_swap_activity(tx) and wallet in get_signers(tx):
                 deltas = token_transfer_deltas_for_wallet(tx, wallet)
                 lines = [f"🔄 Swap-related activity",
@@ -316,7 +350,7 @@ def process_wallet(wallet, st):
                         lines.append(f"(+{len(deltas)-4} more deltas)")
                 alert("\n".join(lines))
 
-            # 4) TRANSFERS (SPL token + SOL) for the wallet
+            # --- 4) TRANSFERS (SPL token + SOL) ---
             tok_deltas = token_transfer_deltas_for_wallet(tx, wallet)
             sol_delta  = sol_transfer_deltas_for_wallet(tx, wallet)
             if (tok_deltas and any(abs(d['delta_ui']) > 0 for d in tok_deltas)) or (sol_delta and abs(sol_delta) > 0):
@@ -333,7 +367,7 @@ def process_wallet(wallet, st):
                     lines.append(f"(+{len(tok_deltas)-5} more token changes)")
                 alert("\n".join(lines))
 
-            # 5) Connected addresses (other signers + SOL recipients where wallet sends SOL)
+            # --- 5) Connected addresses (other signers + SOL recipients) ---
             msg = (tx.get("transaction") or {}).get("message") or {}
             keys = account_keys_list(msg)
             # other signers

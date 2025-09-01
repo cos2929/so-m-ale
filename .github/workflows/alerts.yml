@@ -67,6 +67,8 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT:  ${{ secrets.TG_CHAT }}
+          CONNECT_CHECKS_PER_RUN: "4"
+          HISTORY_PAGE_LIMIT: "100"
           VERBOSE: "1"
           SHARD_INDEX: ${{ matrix.shard_index }}
           SHARD_TOTAL: "4"

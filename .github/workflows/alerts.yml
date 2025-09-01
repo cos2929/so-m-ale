@@ -1,31 +1,50 @@
-name: so-m-ale
+name: sol-m-ale
+
 on:
   schedule:
-    - cron: "*/1 * * * *"   # every minute
-  workflow_dispatch: {}
+    - cron: "*/1 * * * *"   # runs every minute (UTC)
+  workflow_dispatch: {}      # manual "Run workflow" button
 
 permissions:
-  contents: write   # required for saving state.json back to repo
+  contents: write            # needed to push state.json back to the repo
 
 jobs:
-  run:
+  alerts:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install requests
-      - env:
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run bot
+        env:
+          # RPC
           RPC_HTTP: https://api.mainnet-beta.solana.com
-          WALLET_LIST:  ${{ vars.WALLET_LIST }}
-          AMM_PROGRAMS: ${{ vars.AMM_PROGRAMS }}
-          SWAP_PROGRAMS:${{ vars.SWAP_PROGRAMS }}
-          LAUNCH_PROGRAMS:${{ vars.LAUNCH_PROGRAMS }}
+
+          # Your inputs (set these in: Settings → Secrets and variables → Actions → Variables/Secrets)
+          WALLET_LIST:  ${{ vars.WALLET_LIST }}     # one wallet per line
+          AMM_PROGRAMS: ${{ vars.AMM_PROGRAMS }}    # one program id per line
+          SWAP_PROGRAMS: ${{ vars.SWAP_PROGRAMS }}  # one program id per line
+          LAUNCH_PROGRAMS: ${{ vars.LAUNCH_PROGRAMS }}
+
+          # Alerts (Discord required; Telegram optional)
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          # Optional Telegram:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT:  ${{ secrets.TG_CHAT }}
+
+          # Connected-wallet scan knobs (tune if needed)
+          CONNECT_CHECKS_PER_RUN: "4"          # how many new connected wallets to mint-check per run
+          HISTORY_PAGES_PER_CONNECTED: "2"     # pages of history per connected wallet (2 × 100 tx)
+          HISTORY_PAGE_LIMIT: "100"            # tx per page
+
         run: python bot.py
 
       - name: Save state back to repo
@@ -35,6 +54,6 @@ jobs:
             git config user.name  "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add state.json
-            git commit -m "chore: update state [skip ci]" || echo "no changes"
+            git commit -m "chore: update state [skip ci]" || echo "No changes to commit"
             git push
           fi

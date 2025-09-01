@@ -16,6 +16,8 @@ WALLET_LIST = os.getenv("WALLET_LIST", "").strip()  # newline or comma separated
 STATE_FILE = os.getenv("STATE_FILE", "state.json")  # per-shard file
 SHARD_INDEX = int(os.getenv("SHARD_INDEX", "-1"))
 SHARD_TOTAL = int(os.getenv("SHARD_TOTAL", "-1"))
+CONNECT_CHECKS_PER_RUN = int(os.getenv("CONNECT_CHECKS_PER_RUN", "4"))
+HISTORY_PAGE_LIMIT = int(os.getenv("HISTORY_PAGE_LIMIT", "100"))
 VERBOSE = os.getenv("VERBOSE", "0") == "1"
 DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK")
 TG_TOKEN = os.getenv("TG_TOKEN")
@@ -111,40 +113,50 @@ def alert(text, embed=None):
     send_discord(text, embed)
     send_telegram(text)
 
-def mint_alert(wallet, mint, tx_sig, name, symbol, connected):
+def mint_alert(wallet, mint, tx_sig, name, symbol, connected, is_connected_wallet=False, main_wallet=None):
     name_line = f"{name} ({symbol})" if (name or symbol) else "N/A"
     connected_str = "\n".join(f"• {a}" for a in list(connected)[:8]) + (f" (+{len(connected)-8} more)" if len(connected) > 8 else "")
+    title = "🔔 Connected Wallet Mint Detected" if is_connected_wallet else "🚨 Token Mint Detected"
+    fields = [
+        {"name": "Wallet", "value": f"`{wallet}`", "inline": True},
+        {"name": "Mint", "value": f"`{mint}`", "inline": True},
+        {"name": "Name/Symbol", "value": name_line},
+        {"name": "Connected Addresses", "value": connected_str or "None"},
+        {"name": "Links", "value": f"[Token](https://solscan.io/token/{mint}) | [Tx](https://solscan.io/tx/{tx_sig})"}
+    ]
+    if is_connected_wallet and main_wallet:
+        fields.insert(0, {"name": "Main Wallet", "value": f"`{main_wallet}`", "inline": True})
     embed = {
-        "title": "🚨 Token Mint Detected",
-        "fields": [
-            {"name": "Wallet", "value": f"`{wallet}`", "inline": True},
-            {"name": "Mint", "value": f"`{mint}`", "inline": True},
-            {"name": "Name/Symbol", "value": name_line},
-            {"name": "Connected Addresses", "value": connected_str or "None"},
-            {"name": "Links", "value": f"[Token](https://solscan.io/token/{mint}) | [Tx](https://solscan.io/tx/{tx_sig})"}
-        ],
-        "color": 0xFF0000
+        "title": title,
+        "fields": fields,
+        "color": 0xFF9900 if is_connected_wallet else 0xFF0000
     }
-    alert(f"Token mint: {wallet} minted {mint}", embed)
+    alert_text = f"Connected wallet {wallet} minted {mint}" if is_connected_wallet else f"Token mint: {wallet} minted {mint}"
+    alert(alert_text, embed)
 
-def launch_alert(wallet, tx_sig, candidates, connected):
+def launch_alert(wallet, tx_sig, candidates, connected, is_connected_wallet=False, main_wallet=None):
     resolved_lines = []
     for mint in list(candidates)[:6]:
         name, sym = fetch_token_name_symbol(mint)
         label = f" — {name} ({sym})" if (name or sym) else ""
         resolved_lines.append(f"• {mint}{label}\n  [Token](https://solscan.io/token/{mint})")
     connected_str = "\n".join(f"• {a}" for a in list(connected)[:8]) + (f" (+{len(connected)-8} more)" if len(connected) > 8 else "")
+    title = "🔔 Connected Wallet Launch Detected" if is_connected_wallet else "🚀 Launch Activity Detected"
+    fields = [
+        {"name": "Wallet", "value": f"`{wallet}`", "inline": True},
+        {"name": "Tx", "value": f"[Tx](https://solscan.io/tx/{tx_sig})", "inline": True},
+        {"name": "Possible Mints", "value": "\n".join(resolved_lines) or "None"},
+        {"name": "Connected Addresses", "value": connected_str or "None"}
+    ]
+    if is_connected_wallet and main_wallet:
+        fields.insert(0, {"name": "Main Wallet", "value": f"`{main_wallet}`", "inline": True})
     embed = {
-        "title": "🚀 Launch Activity Detected",
-        "fields": [
-            {"name": "Wallet", "value": f"`{wallet}`", "inline": True},
-            {"name": "Tx", "value": f"[Tx](https://solscan.io/tx/{tx_sig})", "inline": True},
-            {"name": "Possible Mints", "value": "\n".join(resolved_lines) or "None"},
-            {"name": "Connected Addresses", "value": connected_str or "None"}
-        ],
-        "color": 0x00FF00
+        "title": title,
+        "fields": fields,
+        "color": 0x99FF00 if is_connected_wallet else 0x00FF00
     }
-    alert(f"Launch activity: {wallet}", embed)
+    alert_text = f"Connected wallet {wallet} launch activity" if is_connected_wallet else f"Launch activity: {wallet}"
+    alert(alert_text, embed)
 
 def lp_alert(wallet, tx_sig, new_accounts, connected):
     sample = list(new_accounts)[:5]
@@ -201,7 +213,7 @@ def instructions_iter(tx):
                 pidx = ix["programIdIndex"]
                 prog = keys[pidx] if isinstance(pidx, int) and pidx < len(keys) else None
             accs = [resolve_account(a, keys) for a in (ix.get("accounts") or [])]
-            yield (prog, accs)
+        yield (prog, accs)
 
 # ---- Mint creation & supply minting detection ----
 def logs_contain_initialize_mint(tx):
@@ -290,6 +302,63 @@ def extract_connected_wallets_from_tx(tx, wallet):
                 connected.add(sender)
     return connected
 
+# ---- Check connected wallet for mint/launch -----
+def check_connected_wallet(wallet, main_wallet, last_sig=None):
+    try:
+        params = [wallet, {"limit": HISTORY_PAGE_LIMIT}]
+        if last_sig:
+            params[1]["before"] = last_sig
+        sigs = rpc("getSignaturesForAddress", params) or []
+    except Exception as e:
+        logging.error(f"[connected {wallet}] signatures error: {e}")
+        return None, []
+    
+    new_sigs = []
+    for entry in sigs:
+        if last_sig and entry["signature"] == last_sig:
+            break
+        new_sigs.append(entry)
+    
+    results = []
+    latest_sig = new_sigs[0]["signature"] if new_sigs else last_sig
+    for s in reversed(new_sigs):
+        sig = s["signature"]
+        try:
+            tx = rpc("getTransaction", [sig, {"encoding": "json", "maxSupportedTransactionVersion": 0}])
+        except Exception as e:
+            logging.error(f"[connected {wallet}] tx error for {sig}: {e}")
+            continue
+        if not tx:
+            continue
+        
+        connected = extract_connected_wallets_from_tx(tx, wallet)
+        
+        # Mint detection
+        if logs_contain_initialize_mint(tx):
+            mints = extract_mint_candidates(tx)
+            for mint in mints:
+                name, sym = fetch_token_name_symbol(mint)
+                results.append(("mint", mint, sig, name, sym, connected))
+        
+        # Supply minting
+        if logs_contain_mint_to(tx):
+            mints = extract_mint_to_candidates(tx)
+            for mint in mints:
+                name, sym = fetch_token_name_symbol(mint)
+                results.append(("mint_to", mint, sig, name, sym, connected))
+        
+        # Launch detection
+        launch_hits = detect_launch_activity(tx)
+        if launch_hits:
+            candidates = set(extract_mint_candidates(tx))
+            for hit in launch_hits:
+                for a in (hit.get("accounts") or [])[:6]:
+                    if a and len(a) >= 32:
+                        candidates.add(a)
+            results.append(("launch", None, sig, None, None, connected, candidates))
+    
+    return latest_sig, results
+
 # ----------------- Main processing -----------------
 def is_valid_wallet(address):
     try:
@@ -308,12 +377,16 @@ def process_wallet(wallet, st):
     wstate = st.get(wallet, {"last_sig": None, "lp_accounts": []})
     last = wstate.get("last_sig")
     known_lp = set(wstate.get("lp_accounts") or [])
+    connected_wallets = st.get("_connected_wallets", {})
+    pending_checks = st.get("_pending_checks", [])
 
     try:
         sigs = rpc("getSignaturesForAddress", [wallet, {"limit": 200}]) or []
     except Exception as e:
         logging.error(f"[{wallet}] signatures error: {e}")
         st[wallet] = wstate
+        st["_connected_wallets"] = connected_wallets
+        st["_pending_checks"] = pending_checks
         return st
 
     vlog(f"[{wallet}] last_sig:", last, "| fetched:", len(sigs))
@@ -335,6 +408,10 @@ def process_wallet(wallet, st):
             continue
 
         connected = extract_connected_wallets_from_tx(tx, wallet)
+        for addr in connected:
+            if addr not in connected_wallets:
+                connected_wallets[addr] = {"last_sig": None, "checked": False}
+                pending_checks.append((addr, wallet))
 
         # 0) LAUNCH
         launch_hits = detect_launch_activity(tx)
@@ -360,7 +437,7 @@ def process_wallet(wallet, st):
             for mint in mints[:6]:
                 name, sym = fetch_token_name_symbol(mint)
                 label = f" — {name} ({sym})" if (name or sym) else ""
-                lines.append(f"• Mint: {mint}{label}\n  Token: https://solscan.io/token/{mint}")
+                lines.append(f"• Mint: {mint}{label}\n  Token: https://solscan.io/token/{mint})")
             if len(lines) > 3:
                 connected_str = "\n".join(f"• {a}" for a in list(connected)[:8]) + (f" (+{len(connected)-8} more)" if len(connected) > 8 else "")
                 embed = {
@@ -391,6 +468,54 @@ def process_wallet(wallet, st):
         wstate["last_sig"] = sig
         st[wallet] = wstate
 
+    # Check connected wallets
+    checks_done = 0
+    i = 0
+    while i < len(pending_checks) and checks_done < CONNECT_CHECKS_PER_RUN:
+        addr, main_wallet = pending_checks[i]
+        info = connected_wallets.get(addr, {"last_sig": None, "checked": False})
+        if info.get("checked"):
+            pending_checks.pop(i)
+            continue
+        try:
+            last_sig, results = check_connected_wallet(addr, main_wallet, info.get("last_sig"))
+            for result in results:
+                if result[0] == "mint":
+                    _, mint, sig, name, sym, connected = result
+                    mint_alert(addr, mint, sig, name, sym, connected, is_connected_wallet=True, main_wallet=main_wallet)
+                elif result[0] == "mint_to":
+                    _, mint, sig, name, sym, connected = result
+                    connected_str = "\n".join(f"• {a}" for a in list(connected)[:8]) + (f" (+{len(connected)-8} more)" if len(connected) > 8 else "")
+                    lines = [f"🪙 Connected Wallet Supply Minted\nWallet: `{addr}`\nMain Wallet: `{main_wallet}`\nTx: https://solscan.io/tx/{sig}"]
+                    label = f" — {name} ({sym})" if (name or sym) else ""
+                    lines.append(f"• Mint: {mint}{label}\n  Token: https://solscan.io/token/{mint})")
+                    embed = {
+                        "title": "🪙 Connected Wallet Supply Minted (MintTo)",
+                        "fields": [
+                            {"name": "Main Wallet", "value": f"`{main_wallet}`", "inline": True},
+                            {"name": "Wallet", "value": f"`{addr}`", "inline": True},
+                            {"name": "Tx", "value": f"[Tx](https://solscan.io/tx/{sig})", "inline": True},
+                            {"name": "Mint", "value": f"`{mint}`"},
+                            {"name": "Connected Addresses", "value": connected_str or "None"}
+                        ],
+                        "color": 0xFFCC00
+                    }
+                    alert("\n".join(lines), embed)
+                elif result[0] == "launch":
+                    _, _, sig, _, _, connected, candidates = result
+                    launch_alert(addr, sig, candidates, connected, is_connected_wallet=True, main_wallet=main_wallet)
+            info["last_sig"] = last_sig
+            info["checked"] = True
+            connected_wallets[addr] = info
+            pending_checks.pop(i)
+            checks_done += 1
+        except Exception as e:
+            logging.error(f"[connected {addr}] check error: {e}")
+            i += 1
+            continue
+
+    st["_connected_wallets"] = connected_wallets
+    st["_pending_checks"] = pending_checks
     return st
 
 # ----------------- Entrypoint -----------------------

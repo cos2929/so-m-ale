@@ -15,6 +15,9 @@ HISTORY_PAGES_PER_CONNECTED  = int(os.getenv("HISTORY_PAGES_PER_CONNECTED", "2")
 HISTORY_PAGE_LIMIT           = int(os.getenv("HISTORY_PAGE_LIMIT", "100"))
 VERBOSE = os.getenv("VERBOSE", "0") == "1"
 
+# Transfer threshold (new)
+MIN_SOL_TRANSFER = float(os.getenv("MIN_SOL_TRANSFER", "1"))  # in SOL; alert only if |ΔSOL| ≥ this
+
 # Alerts (use one or both)
 DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK")
 TG_TOKEN = os.getenv("TG_TOKEN")
@@ -453,20 +456,24 @@ def process_wallet(wallet, st):
                     lines.append(f"(+{len(deltas)-4} more deltas)")
             alert("\n".join(lines))
 
-        # 4) TRANSFERS summary (SPL + SOL)
+        # 4) TRANSFERS summary (SPL + SOL) with SOL threshold
         tok_deltas = token_transfer_deltas_for_wallet(tx, wallet)
         sol_delta  = sol_transfer_deltas_for_wallet(tx, wallet)
-        if (tok_deltas and any(abs(d['delta_ui']) > 0 for d in tok_deltas)) or (sol_delta and abs(sol_delta) > 0):
+
+        token_trigger = bool(tok_deltas and any(abs(d['delta_ui']) > 0 for d in tok_deltas))
+        sol_trigger   = (sol_delta is not None) and (abs(sol_delta) >= MIN_SOL_TRANSFER)
+
+        if token_trigger or sol_trigger:
             lines = [f"💸 Transfer activity",
                      f"Wallet: `{wallet}`",
                      f"Tx: https://solscan.io/tx/{sig}"]
-            if sol_delta and abs(sol_delta) > 0:
+            if sol_trigger:
                 arrow = "➕" if sol_delta > 0 else "➖"
-                lines.append(f"{arrow} {abs(sol_delta):,.9f} SOL")
-            for d in tok_deltas[:5]:
+                lines.append(f"{arrow} {abs(sol_delta):,.9f} SOL (min {MIN_SOL_TRANSFER} SOL)")
+            for d in (tok_deltas or [])[:5]:
                 dir_ = "➕" if d["delta_ui"] > 0 else "➖"
                 lines.append(f"{dir_} {abs(d['delta_ui'])} of {d['mint']}")
-            if len(tok_deltas) > 5:
+            if tok_deltas and len(tok_deltas) > 5:
                 lines.append(f"(+{len(tok_deltas)-5} more token changes)")
             alert("\n".join(lines))
 

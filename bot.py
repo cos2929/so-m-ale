@@ -12,18 +12,20 @@ logging.basicConfig(filename='bot.log', level=logging.INFO,
 
 # --------- Config via environment ----------
 RPC_HTTP = os.getenv("RPC_HTTP", "https://api.mainnet-beta.solana.com")
-WALLET_LIST = os.getenv("WALLET_LIST", "").strip()  # newline or comma separated
-STATE_FILE = os.getenv("STATE_FILE", "state.json")  # per-shard file
+WALLET_LIST = os.getenv("WALLET_LIST", "").strip()
+STATE_FILE = os.getenv("STATE_FILE", "state.json")
 SHARD_INDEX = int(os.getenv("SHARD_INDEX", "-1"))
 SHARD_TOTAL = int(os.getenv("SHARD_TOTAL", "-1"))
-CONNECT_CHECKS_PER_RUN = int(os.getenv("CONNECT_CHECKS_PER_RUN", "4"))
-HISTORY_PAGE_LIMIT = int(os.getenv("HISTORY_PAGE_LIMIT", "100"))
+CONNECT_CHECKS_PER_RUN = int(os.getenv("CONNECT_CHECKS_PER_RUN", "2"))
+HISTORY_PAGE_LIMIT = int(os.getenv("HISTORY_PAGE_LIMIT", "50"))
 VERBOSE = os.getenv("VERBOSE", "0") == "1"
 DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK")
 TG_TOKEN = os.getenv("TG_TOKEN")
 TG_CHAT = os.getenv("TG_CHAT")
 AMM_PROGRAMS_RAW = os.getenv("AMM_PROGRAMS", "").strip()
 LAUNCH_PROGRAMS_RAW = os.getenv("LAUNCH_PROGRAMS", "").strip()
+CYCLE_TIME = int(os.getenv("CYCLE_TIME", "60"))  # seconds
+TIME_WINDOW = 30  # seconds, only process txs within this window
 
 # Known programs
 TOKEN_PROGRAMS = {
@@ -48,7 +50,7 @@ AMM_PROGRAMS = set(parse_list_env(AMM_PROGRAMS_RAW))
 LAUNCH_PROGRAMS = set(parse_list_env(LAUNCH_PROGRAMS_RAW))
 
 # -------------------- RPC helpers --------------------
-def rpc(method, params, retries=3):
+def rpc(method, params, retries=5):
     for attempt in range(retries):
         try:
             r = requests.post(RPC_HTTP, json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params}, timeout=30)
@@ -65,7 +67,7 @@ def rpc(method, params, retries=3):
         except Exception as e:
             logging.error(f"RPC error (attempt {attempt+1}/{retries}): {e}")
             if attempt == retries - 1:
-                raise
+                return None
             time.sleep(2 ** attempt)
 
 # ---------------- Persistence -----------------------
@@ -96,7 +98,7 @@ def send_discord(text, embed=None):
     except Exception as e:
         logging.error(f"Discord send error: {e}")
 
-def msg_clip(s, limit=3900):  # Telegram < 4096
+def msg_clip(s, limit=3900):
     return s if len(s) <= limit else s[:limit-10] + "…(clipped)"
 
 def send_telegram(text):
@@ -302,19 +304,27 @@ def extract_connected_wallets_from_tx(tx, wallet):
                 connected.add(sender)
     return connected
 
-# ---- Check connected wallet for mint/launch -----
-def check_connected_wallet(wallet, main_wallet, last_sig=None):
+# ---- Check wallet (main or connected) -----
+def check_wallet(wallet, main_wallet=None, last_sig=None, is_connected_wallet=False):
     try:
         params = [wallet, {"limit": HISTORY_PAGE_LIMIT}]
         if last_sig:
             params[1]["before"] = last_sig
         sigs = rpc("getSignaturesForAddress", params) or []
     except Exception as e:
-        logging.error(f"[connected {wallet}] signatures error: {e}")
+        logging.error(f"[{'connected' if is_connected_wallet else 'main'} {wallet}] signatures error: {e}")
         return None, []
     
+    current_time = int(time.time())
     new_sigs = []
     for entry in sigs:
+        block_time = entry.get("blockTime")
+        if block_time is None:
+            logging.warning(f"[{'connected' if is_connected_wallet else 'main'} {wallet}] No blockTime for signature {entry['signature']}, skipping")
+            continue
+        if current_time - block_time > TIME_WINDOW:
+            vlog(f"[{'connected' if is_connected_wallet else 'main'} {wallet}] Skipping old tx {entry['signature']} (blockTime: {block_time}, age: {current_time - block_time}s)")
+            continue
         if last_sig and entry["signature"] == last_sig:
             break
         new_sigs.append(entry)
@@ -326,28 +336,25 @@ def check_connected_wallet(wallet, main_wallet, last_sig=None):
         try:
             tx = rpc("getTransaction", [sig, {"encoding": "json", "maxSupportedTransactionVersion": 0}])
         except Exception as e:
-            logging.error(f"[connected {wallet}] tx error for {sig}: {e}")
+            logging.error(f"[{'connected' if is_connected_wallet else 'main'} {wallet}] tx error for {sig}: {e}")
             continue
         if not tx:
             continue
         
         connected = extract_connected_wallets_from_tx(tx, wallet)
         
-        # Mint detection
         if logs_contain_initialize_mint(tx):
             mints = extract_mint_candidates(tx)
             for mint in mints:
                 name, sym = fetch_token_name_symbol(mint)
                 results.append(("mint", mint, sig, name, sym, connected))
         
-        # Supply minting
         if logs_contain_mint_to(tx):
             mints = extract_mint_to_candidates(tx)
             for mint in mints:
                 name, sym = fetch_token_name_symbol(mint)
                 results.append(("mint_to", mint, sig, name, sym, connected))
         
-        # Launch detection
         launch_hits = detect_launch_activity(tx)
         if launch_hits:
             candidates = set(extract_mint_candidates(tx))
@@ -356,6 +363,16 @@ def check_connected_wallet(wallet, main_wallet, last_sig=None):
                     if a and len(a) >= 32:
                         candidates.add(a)
             results.append(("launch", None, sig, None, None, connected, candidates))
+        
+        lp_hits = detect_lp_activity(tx)
+        if lp_hits and wallet in get_signers(tx) and not is_connected_wallet:
+            newly_found = set()
+            for hit in lp_hits:
+                for a in (hit.get("accounts") or []):
+                    if a and len(a) >= 32:
+                        newly_found.add(a)
+            if newly_found:
+                results.append(("lp", None, sig, None, None, connected, newly_found))
     
     return latest_sig, results
 
@@ -380,105 +397,100 @@ def process_wallet(wallet, st):
     connected_wallets = st.get("_connected_wallets", {})
     pending_checks = st.get("_pending_checks", [])
 
-    try:
-        sigs = rpc("getSignaturesForAddress", [wallet, {"limit": 200}]) or []
-    except Exception as e:
-        logging.error(f"[{wallet}] signatures error: {e}")
+    last_sig, results = check_wallet(wallet, last_sig=last)
+    if last_sig is None:
         st[wallet] = wstate
         st["_connected_wallets"] = connected_wallets
         st["_pending_checks"] = pending_checks
         return st
 
-    vlog(f"[{wallet}] last_sig:", last, "| fetched:", len(sigs))
-    new_sigs = []
-    for entry in sigs:
-        if last and entry["signature"] == last:
-            break
-        new_sigs.append(entry)
-    vlog(f"[{wallet}] new_sigs:", len(new_sigs))
-
-    for s in reversed(new_sigs):
-        sig = s["signature"]
-        try:
-            tx = rpc("getTransaction", [sig, {"encoding": "json", "maxSupportedTransactionVersion": 0}])
-        except Exception as e:
-            logging.error(f"[{wallet}] tx error for {sig}: {e}")
-            continue
-        if not tx:
-            continue
-
-        connected = extract_connected_wallets_from_tx(tx, wallet)
+    for result in results:
+        connected = result[5]
         for addr in connected:
             if addr not in connected_wallets:
                 connected_wallets[addr] = {"last_sig": None, "checked": False}
                 pending_checks.append((addr, wallet))
-
-        # 0) LAUNCH
-        launch_hits = detect_launch_activity(tx)
-        if launch_hits:
-            candidates = set(extract_mint_candidates(tx))
-            for hit in launch_hits:
-                for a in (hit.get("accounts") or [])[:6]:
-                    if a and len(a) >= 32:
-                        candidates.add(a)
-            launch_alert(wallet, sig, candidates, connected)
-
-        # 1) NEW TOKEN MINT
-        if logs_contain_initialize_mint(tx):
-            mints = extract_mint_candidates(tx)
-            for mint in mints:
-                name, sym = fetch_token_name_symbol(mint)
-                mint_alert(wallet, mint, sig, name, sym, connected)
-
-        # 2) SUPPLY MINTING
-        if logs_contain_mint_to(tx):
-            mints = extract_mint_to_candidates(tx)
+        
+        if result[0] == "mint":
+            _, mint, sig, name, sym, connected = result
+            mint_alert(wallet, mint, sig, name, sym, connected)
+        elif result[0] == "mint_to":
+            _, mint, sig, name, sym, connected = result
             lines = [f"🪙 Supply minted (MintTo)\nWallet: `{wallet}`\nTx: https://solscan.io/tx/{sig}"]
-            for mint in mints[:6]:
-                name, sym = fetch_token_name_symbol(mint)
-                label = f" — {name} ({sym})" if (name or sym) else ""
-                lines.append(f"• Mint: {mint}{label}\n  Token: https://solscan.io/token/{mint})")
-            if len(lines) > 3:
-                connected_str = "\n".join(f"• {a}" for a in list(connected)[:8]) + (f" (+{len(connected)-8} more)" if len(connected) > 8 else "")
-                embed = {
-                    "title": "🪙 Supply Minted (MintTo)",
-                    "fields": [
-                        {"name": "Wallet", "value": f"`{wallet}`", "inline": True},
-                        {"name": "Tx", "value": f"[Tx](https://solscan.io/tx/{sig})", "inline": True},
-                        {"name": "Mints", "value": "\n".join(lines[1:]) or "None"},
-                        {"name": "Connected Addresses", "value": connected_str or "None"}
-                    ],
-                    "color": 0xFF9900
-                }
-                alert("\n".join(lines), embed)
+            label = f" — {name} ({sym})" if (name or sym) else ""
+            lines.append(f"• Mint: {mint}{label}\n  Token: https://solscan.io/token/{mint})")
+            connected_str = "\n".join(f"• {a}" for a in list(connected)[:8]) + (f" (+{len(connected)-8} more)" if len(connected) > 8 else "")
+            embed = {
+                "title": "🪙 Supply Minted (MintTo)",
+                "fields": [
+                    {"name": "Wallet", "value": f"`{wallet}`", "inline": True},
+                    {"name": "Tx", "value": f"[Tx](https://solscan.io/tx/{sig})", "inline": True},
+                    {"name": "Mints", "value": "\n".join(lines[1:]) or "None"},
+                    {"name": "Connected Addresses", "value": connected_str or "None"}
+                ],
+                "color": 0xFF9900
+            }
+            alert("\n".join(lines), embed)
+        elif result[0] == "launch":
+            _, _, sig, _, _, connected, candidates = result
+            launch_alert(wallet, sig, candidates, connected)
+        elif result[0] == "lp":
+            _, _, sig, _, _, connected, newly_found = result
+            known_lp |= newly_found
+            lp_alert(wallet, sig, newly_found, connected)
 
-        # 3) LP-RELATED ACTIVITY
-        lp_hits = detect_lp_activity(tx)
-        if lp_hits and wallet in get_signers(tx):
-            newly_found = set()
-            for hit in lp_hits:
-                for a in (hit.get("accounts") or []):
-                    if a and len(a) >= 32 and a not in known_lp:
-                        newly_found.add(a)
-            if newly_found:
-                known_lp |= newly_found
-                wstate["lp_accounts"] = sorted(known_lp)
-                lp_alert(wallet, sig, newly_found, connected)
+    wstate["last_sig"] = last_sig
+    wstate["lp_accounts"] = sorted(known_lp)
+    st[wallet] = wstate
+    st["_connected_wallets"] = connected_wallets
+    st["_pending_checks"] = pending_checks
+    return st
 
-        wstate["last_sig"] = sig
-        st[wallet] = wstate
+# ----------------- Entrypoint -----------------------
+def parse_wallets(raw):
+    if not raw:
+        return []
+    if "\n" in raw:
+        wallets = [w.strip() for w in raw.splitlines()]
+    else:
+        wallets = [w.strip() for w in raw.split(",")]
+    return [w for w in wallets if w and is_valid_wallet(w)]
 
-    # Check connected wallets
-    checks_done = 0
-    i = 0
-    while i < len(pending_checks) and checks_done < CONNECT_CHECKS_PER_RUN:
-        addr, main_wallet = pending_checks[i]
-        info = connected_wallets.get(addr, {"last_sig": None, "checked": False})
-        if info.get("checked"):
-            pending_checks.pop(i)
-            continue
-        try:
-            last_sig, results = check_connected_wallet(addr, main_wallet, info.get("last_sig"))
+def apply_shard(wallets, idx, total):
+    if idx < 0 or total <= 0:
+        return wallets
+    return [w for i, w in enumerate(wallets) if i % total == idx]
+
+def main():
+    wallets = parse_wallets(WALLET_LIST)
+    if not wallets:
+        logging.error("WALLET_LIST is empty. Provide one wallet per line or comma separated.")
+        raise SystemExit("WALLET_LIST is empty")
+    wallets = apply_shard(wallets, SHARD_INDEX, SHARD_TOTAL)
+    vlog(f"Shard {SHARD_INDEX}/{SHARD_TOTAL} processing {len(wallets)} wallet(s)")
+    logging.info(f"Shard {SHARD_INDEX}/{SHARD_TOTAL} processing {len(wallets)} wallet(s)")
+    
+    st = load_state()
+    while True:
+        start_time = time.time()
+        for w in wallets:
+            st = process_wallet(w, st)
+            time.sleep(0.1)  # Small delay to spread RPC calls
+        
+        connected_wallets = st.get("_connected_wallets", {})
+        pending_checks = st.get("_pending_checks", [])
+        checks_done = 0
+        i = 0
+        while i < len(pending_checks) and checks_done < CONNECT_CHECKS_PER_RUN:
+            addr, main_wallet = pending_checks[i]
+            info = connected_wallets.get(addr, {"last_sig": None, "checked": False})
+            if info.get("checked"):
+                pending_checks.pop(i)
+                continue
+            last_sig, results = check_wallet(addr, main_wallet, info.get("last_sig"), is_connected_wallet=True)
+            if last_sig is None:
+                i += 1
+                continue
             for result in results:
                 if result[0] == "mint":
                     _, mint, sig, name, sym, connected = result
@@ -509,45 +521,14 @@ def process_wallet(wallet, st):
             connected_wallets[addr] = info
             pending_checks.pop(i)
             checks_done += 1
-        except Exception as e:
-            logging.error(f"[connected {addr}] check error: {e}")
-            i += 1
-            continue
-
-    st["_connected_wallets"] = connected_wallets
-    st["_pending_checks"] = pending_checks
-    return st
-
-# ----------------- Entrypoint -----------------------
-def parse_wallets(raw):
-    if not raw:
-        return []
-    if "\n" in raw:
-        wallets = [w.strip() for w in raw.splitlines()]
-    else:
-        wallets = [w.strip() for w in raw.split(",")]
-    return [w for w in wallets if w and is_valid_wallet(w)]
-
-def apply_shard(wallets, idx, total):
-    if idx < 0 or total <= 0:
-        return wallets
-    return [w for i, w in enumerate(wallets) if i % total == idx]
-
-def main():
-    wallets = parse_wallets(WALLET_LIST)
-    if not wallets:
-        logging.error("WALLET_LIST is empty. Provide one wallet per line or comma separated.")
-        raise SystemExit("WALLET_LIST is empty")
-    wallets = apply_shard(wallets, SHARD_INDEX, SHARD_TOTAL)
-    vlog(f"Shard {SHARD_INDEX}/{SHARD_TOTAL} processing {len(wallets)} wallet(s)")
-    logging.info(f"Shard {SHARD_INDEX}/{SHARD_TOTAL} processing {len(wallets)} wallet(s)")
-    st = load_state()
-    for w in wallets:
-        vlog("Processing wallet:", w)
-        logging.info(f"Processing wallet: {w}")
-        st = process_wallet(w, st)
-        time.sleep(0.2)
-    save_state(st)
+        st["_connected_wallets"] = connected_wallets
+        st["_pending_checks"] = pending_checks
+        save_state(st)
+        
+        elapsed = time.time() - start_time
+        sleep_time = max(0, CYCLE_TIME - elapsed)
+        vlog(f"Cycle took {elapsed:.2f}s, sleeping for {sleep_time:.2f}s")
+        time.sleep(sleep_time)
 
 if __name__ == "__main__":
     main()
